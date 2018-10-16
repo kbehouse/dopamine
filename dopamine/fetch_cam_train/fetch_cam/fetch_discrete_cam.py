@@ -6,7 +6,7 @@ import numpy as np
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005):
-        self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, is_render=False)
+        self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005)
 
 
     def state_preprocess(self, img):

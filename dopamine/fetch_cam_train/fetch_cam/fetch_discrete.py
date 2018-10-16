@@ -56,8 +56,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             self._step_callback()
             this_action_use_step+=1
 
-            # print("self.is_render = ", self.is_render)
-            if self.is_render:       
+            if self.is_render:
                 self.render()
 
             dis = np.linalg.norm(self.pos - want_pos)
@@ -102,8 +101,6 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 return gripper_state
 
         
-
-
     def measure_obj_reward(self):
         obj_name = 'object0'
         object_pos = self.sim.data.get_site_xpos(obj_name)
