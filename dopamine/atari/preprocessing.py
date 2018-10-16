@@ -178,6 +178,8 @@ class AtariPreprocessing(object):
     # Pool the last two observations.
     observation = self._pool_and_resize()
 
+    # print('observation = ', np.shape(observation))
+
     self.game_over = game_over
     return observation, accumulated_reward, is_terminal, info
 
@@ -212,4 +214,11 @@ class AtariPreprocessing(object):
                                    (self.screen_size, self.screen_size),
                                    interpolation=cv2.INTER_AREA)
     int_image = np.asarray(transformed_image, dtype=np.uint8)
+
+
+    # print('self.screen_buffer.shape', np.shape(self.screen_buffer) )
+    # cv2.imwrite('screen_buffer_0.jpg', self.screen_buffer[0])
+    # cv2.imwrite('transformed_image.jpg', transformed_image)
+    # cv2.imwrite('int_image.jpg', int_image)
+
     return np.expand_dims(int_image, axis=2)

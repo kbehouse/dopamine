@@ -23,14 +23,15 @@ import time
 
 
 import atari_py
-from dopamine.atari import preprocessing
+# from dopamine.atari import preprocessing
 from dopamine.common import checkpointer
 from dopamine.common import iteration_statistics
 from dopamine.common import logger
 import gym
 import numpy as np
 import tensorflow as tf
-
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
+from fetch_cam import FetchDiscreteCamEnv
 import gin.tf
 
 
@@ -50,6 +51,11 @@ def load_gin_configs(gin_files, gin_bindings):
                                       skip_unknown=False)
 
 
+def create_fetch_cam_environment():
+  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005)
+  return env
+
+'''
 def create_atari_environment(game_name, sticky_actions=True):
   """Wraps an Atari 2600 Gym environment with some basic preprocessing.
 
@@ -83,7 +89,7 @@ def create_atari_environment(game_name, sticky_actions=True):
   env = env.env
   env = preprocessing.AtariPreprocessing(env)
   return env
-
+'''
 
 @gin.configurable
 class Runner(object):
@@ -107,9 +113,8 @@ class Runner(object):
   def __init__(self,
                base_dir,
                create_agent_fn,
-               create_environment_fn=create_atari_environment,
+               create_environment_fn=create_fetch_cam_environment,
                game_name=None,
-               sticky_actions=True,
                checkpoint_file_prefix='ckpt',
                logging_file_prefix='log',
                log_every_n=1,
@@ -145,7 +150,7 @@ class Runner(object):
     - Reload from the latest checkpoint, if available, and initialize the
       Checkpointer object.
     """
-    assert base_dir and game_name is not None
+    assert base_dir is not None
     self._logging_file_prefix = logging_file_prefix
     self._log_every_n = log_every_n
     self._num_iterations = num_iterations
@@ -156,10 +161,12 @@ class Runner(object):
     self._create_directories()
     self._summary_writer = tf.summary.FileWriter(self._base_dir)
 
-    self._environment = create_environment_fn(game_name, sticky_actions)
+    self._environment = create_environment_fn()
     # Set up a session and initialize variables.
+    config = tf.ConfigProto(allow_soft_placement=True)
+    config.gpu_options.per_process_gpu_memory_fraction = 0.3
     self._sess = tf.Session('',
-                            config=tf.ConfigProto(allow_soft_placement=True))
+                            config=config) #tf.ConfigProto(allow_soft_placement=True))
     self._agent = create_agent_fn(self._sess, self._environment,
                                   summary_writer=self._summary_writer)
     self._sess.run(tf.global_variables_initializer())
@@ -231,7 +238,6 @@ class Runner(object):
         environment.
     """
     observation, reward, is_terminal, _ = self._environment.step(action)
-    # print('observation shape = ', np.shape(observation) )
     return observation, reward, is_terminal
 
   def _end_episode(self, reward):
@@ -264,7 +270,7 @@ class Runner(object):
       # Perform reward clipping.
       reward = np.clip(reward, -1, 1)
 
-      if (self._environment.game_over or
+      if (is_terminal or #self._environment.game_over or 
           step_number == self._max_steps_per_episode):
         # Stop the run loop once we reach the true end of episode.
         break

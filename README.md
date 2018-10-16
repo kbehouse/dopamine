@@ -152,6 +152,13 @@ python -um dopamine.atari.train \
   --gin_files='dopamine/agents/dqn/configs/dqn.gin'
 ```
 
+```
+python -um dopamine.atari.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/dopamine_atari_rainbow \
+  --gin_files='dopamine/agents/rainbow/configs/rainbow.gin'
+```
+
 By default, this will kick off an experiment lasting 200 million frames.
 The command-line interface will output statistics about the latest training
 episode:

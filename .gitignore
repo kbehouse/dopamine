@@ -5,3 +5,9 @@
 .pytest_cache
 __pycache__
 .cache
+＃dopamine/fetch_cam_train/
+log/
+*.jpg
+RUN.md
+test.log
+README.md
