@@ -169,7 +169,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 done = True
                 reward = -1
             else:
-                reward = self.measure_obj_reward() # 0
+                reward = 0 # self.measure_obj_reward() # 0
             
 
 

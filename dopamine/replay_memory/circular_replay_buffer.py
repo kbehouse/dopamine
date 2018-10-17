@@ -143,7 +143,13 @@ class OutOfGraphReplayBuffer(object):
     else:
       self._observation_shape = (observation_shape, observation_shape)
     self._stack_size = stack_size
-    self._state_shape = self._observation_shape + (self._stack_size,)
+    print(f'self._observation_shape={self._observation_shape}, len(self._observation_shape)={len(self._observation_shape)}')
+    if len(self._observation_shape) ==3:
+      self._state_shape = (self._observation_shape[0], self._observation_shape[1], self._observation_shape[2] * self._stack_size)
+      print(f'self._state_shape={self._state_shape}')
+    else:  
+      self._state_shape = self._observation_shape + (self._stack_size,)
+    
     self._replay_capacity = replay_capacity
     self._batch_size = batch_size
     self._update_horizon = update_horizon
@@ -168,7 +174,12 @@ class OutOfGraphReplayBuffer(object):
     """
     self._store = {}
     for storage_element in self.get_storage_signature():
+      print('storage_element = ', storage_element)
       array_shape = [self._replay_capacity] + list(storage_element.shape)
+      print('array_shape = ', array_shape)
+      print('storage_element.name = ', storage_element.name)
+      print('storage_element.type = ', storage_element.type)
+      
       self._store[storage_element.name] = np.empty(
           array_shape, dtype=storage_element.type)
 
@@ -328,8 +339,19 @@ class OutOfGraphReplayBuffer(object):
   def get_observation_stack(self, index):
     state = self.get_range(self._store['observation'],
                            index - self._stack_size + 1, index + 1)
-    # The stacking axis is 0 but the agent expects as the last axis.
-    return np.moveaxis(state, 0, -1)
+    if len(self._state_shape) ==3:
+      tmp_state = np.zeros(self._state_shape)
+      for i in range(self._stack_size):
+        s_index, e_index = i* self._observation_shape[2], (i+1)* self._observation_shape[2]
+        tmp_state[:, :, s_index:e_index] = state[i,:,:]
+      # print('tmp_state shape = ',np.shape(tmp_state))
+      return tmp_state
+    else:
+      # print('get_observation_stack() state=', np.shape(state), \
+      #             ', index =', index, ', index - self._stack_size + 1 = ', index - self._stack_size + 1, \
+      #             ', index + 1 =', index + 1)
+      # The stacking axis is 0 but the agent expects as the last axis.
+      return np.moveaxis(state, 0, -1)
 
   def get_terminal_stack(self, index):
     return self.get_range(self._store['terminal'], index - self._stack_size + 1,
@@ -388,6 +410,8 @@ class OutOfGraphReplayBuffer(object):
     batch_arrays = []
     for element in transition_elements:
       batch_arrays.append(np.empty(element.shape, dtype=element.type))
+    # print('transition_elements = ', transition_elements)
+    # print('batch_arrays = ', batch_arrays)
     return tuple(batch_arrays)
 
   def sample_index_batch(self, batch_size):

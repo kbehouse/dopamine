@@ -150,6 +150,7 @@ class DQNAgent(object):
     self.summary_writer = summary_writer
     self.summary_writing_frequency = summary_writing_frequency
 
+    print('in DQNAgent __init__ OBSERVATION_SHAPE = ', OBSERVATION_SHAPE)
     with tf.device(tf_device):
       # Create a placeholder for the state input to the DQN network.
       # The last axis indicates the number of consecutive frames stacked.
@@ -174,7 +175,7 @@ class DQNAgent(object):
     # Variables to be initialized by the agent once it interacts with the
     # environment.
     self._observation = None
-    self._last_observation = None
+    self._last_observation = None    
 
   def _get_network_type(self):
     """Returns the type of the outputs of a Q value network.
@@ -193,6 +194,7 @@ class DQNAgent(object):
     Returns:
       net: _network_type object containing the tensors output by the network.
     """
+    print(' --------in DQN network_template---------')
     net = tf.cast(state, tf.float32)
     net = tf.div(net, 255.)
     net = slim.conv2d(net, 32, [8, 8], stride=4)
@@ -218,15 +220,19 @@ class DQNAgent(object):
     # Calling online_convnet will generate a new graph as defined in
     # self._get_network_template using whatever input is passed, but will always
     # share the same weights.
+    print('in DQN _build_networks')
     self.online_convnet = tf.make_template('Online', self._network_template)
     self.target_convnet = tf.make_template('Target', self._network_template)
+    print(' self.online_convnet(self.state_ph)')
     self._net_outputs = self.online_convnet(self.state_ph)
     # TODO(bellemare): Ties should be broken. They are unlikely to happen when
     # using a deep network, but may affect performance with a linear
     # approximation scheme.
     self._q_argmax = tf.argmax(self._net_outputs.q_values, axis=1)[0]
 
+    print('before self.online_convnet(self._replay.states)')
     self._replay_net_outputs = self.online_convnet(self._replay.states)
+    print('before self.target_convnet(self._replay.next_states))')
     self._replay_next_target_net_outputs = self.target_convnet(
         self._replay.next_states)
 
@@ -366,7 +372,7 @@ class DQNAgent(object):
     Returns:
        int, the selected action.
     """
-    print('in DQN _select_action')
+    # print('in DQN _select_action')
     epsilon = self.epsilon_eval if self.eval_mode else self.epsilon_fn(
         self.epsilon_decay_period,
         self.training_steps,

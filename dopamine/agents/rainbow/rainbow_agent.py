@@ -151,25 +151,36 @@ class RainbowAgent(dqn_agent.DQNAgent):
     Returns:
       net: _network_type object containing the tensors output by the network.
     """
+    print(' --------in Rainbow network_template---------')
+
     weights_initializer = slim.variance_scaling_initializer(
         factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
 
     net = tf.cast(state, tf.float32)
+    print(' tf.float32 , net -> ', net)
     net = tf.div(net, 255.)
+    print(' div 255 , net -> ', net)
     net = slim.conv2d(
         net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
+    print(' conv2d 32, [8,8], stride=4 , net -> ', net)
     net = slim.conv2d(
         net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
+    print(' conv2d 64, [4, 4], stride=2 , net -> ', net)
     net = slim.conv2d(
         net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+    print(' conv2d 64, [3, 3], stride=1 , net -> ', net)
     net = slim.flatten(net)
+    print(' flatten , net -> ', net)
     net = slim.fully_connected(
         net, 512, weights_initializer=weights_initializer)
+    print(' 512 , net -> ', net)
     net = slim.fully_connected(
         net,
         self.num_actions * self._num_atoms,
         activation_fn=None,
         weights_initializer=weights_initializer)
+
+    print(' fully_connected , net -> ', net)
 
     logits = tf.reshape(net, [-1, self.num_actions, self._num_atoms])
     probabilities = tf.contrib.layers.softmax(logits)

@@ -150,7 +150,7 @@ def go_obj_savepic_with_camenv(is_render = True):
     create_dir(save_dir)
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005,gray_img =False)
     # obs = env.reset()
     # done = False
 
@@ -191,7 +191,7 @@ def go_obj_savepic_with_camenv(is_render = True):
             s,r, d, info =  env.step(a)
             sum_r += r  
             
-            cv2.imwrite(save_dir + '/%03d_r%3.2f.jpg' % (step_count,r ),  s[:,:,0])
+            cv2.imwrite(save_dir + '/%03d_r%3.2f.jpg' % (step_count,r ),  s)
         
 
 
@@ -211,7 +211,7 @@ def go_obj_savepic_with_camenv(is_render = True):
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
-go_obj_savepic()
+# go_obj_savepic()
 # go_obj()
 
-# go_obj_savepic_with_camenv()
+go_obj_savepic_with_camenv()
