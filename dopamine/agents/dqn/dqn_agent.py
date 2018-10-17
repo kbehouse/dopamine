@@ -163,6 +163,8 @@ class DQNAgent(object):
       self._train_op = self._build_train_op()
       self._sync_qt_ops = self._build_sync_op()
 
+      print('self.state_ph= ', self.state_ph)
+
     if self.summary_writer is not None:
       # All tf.summaries should have been defined prior to running this.
       self._merged_summaries = tf.summary.merge_all()
@@ -364,6 +366,7 @@ class DQNAgent(object):
     Returns:
        int, the selected action.
     """
+    print('in DQN _select_action')
     epsilon = self.epsilon_eval if self.eval_mode else self.epsilon_fn(
         self.epsilon_decay_period,
         self.training_steps,
@@ -411,11 +414,17 @@ class DQNAgent(object):
     Args:
       observation: numpy array, an observation from the environment.
     """
+    
     # Set current observation. Represents an 84 x 84 x 1 image frame.
     self._observation = observation[:, :, 0]
     # Swap out the oldest frame with the current frame.
     self.state = np.roll(self.state, -1, axis=3)
     self.state[0, :, :, -1] = self._observation
+
+    print('observation.shape = ', np.shape(observation)) # observation.shape =  (84, 84, 1)
+    print('np.shape(self.state) = ', np.shape(self.state)) # self.state =  (1, 84, 84, 4)
+    print('self._observation.shape = ', np.shape(self._observation)) # self._observation.shape =  (84, 84)
+
 
   def _store_transition(self, last_observation, action, reward, is_terminal):
     """Stores an experienced transition.
