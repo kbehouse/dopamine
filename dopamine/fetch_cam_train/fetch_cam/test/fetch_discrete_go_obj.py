@@ -7,6 +7,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)),'../../'
 from fetch_cam import FetchDiscreteEnv
 # from fetch_cam import FetchCameraEnv
 from fetch_cam import FetchDiscreteCamEnv
+from fetch_cam.fetch_discrete_cam_siamese import FetchDiscreteCamSiamenseEnv
 from fsm import FSM
 import cv2
 from PIL import Image
@@ -156,7 +157,7 @@ def go_obj_savepic_with_camenv(is_render = True):
     create_dir(save_dir)
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
     # obs = env.reset()
     # done = False
 
@@ -197,10 +198,13 @@ def go_obj_savepic_with_camenv(is_render = True):
             s,r, d, info =  env.step(a)
             sum_r += r  
             
-            print('s shape = ', np.shape(s))
-           
-            cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s[:,:,0])
-        
+            # print('s shape = ', np.shape(s))
+            # gray image
+            # cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s[:,:,0])
+            
+            rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
+            cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+            
             # img = Image.fromarray(s[:,:,0], 'RGB')
             # # img.save(save_dir + '/%03d.jpg' % step_count)
             # img.save(save_dir + '/%03d_r%3.2f.jpg' % (step_count,r ))
@@ -214,13 +218,71 @@ def go_obj_savepic_with_camenv(is_render = True):
         print("use step = ", step_count)
 
         env.render()
+        
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
+def go_obj_savepic_siamese(is_render = True):
+    save_dir = 'z_fetch_run_pic'
+    create_dir(save_dir)
+    # dis_tolerance  = 0.0001     # 1mm
+    step_ds = 0.005
+    env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
+    s_time = time.time()
 
-    
+
+    for i in range(5):
+        obs = env.reset()
+        
+            
+        # env.gripper_close(False)
+        env.render()
+        save_dir = 'tmp/z_fetch_run_pic_%02d' %i 
+        create_dir(save_dir)
+        step_count = 0
+        print('------start ep %03d--------' % i)
+        rgb_img = cv2.cvtColor(obs, cv2.COLOR_BGR2RGB)
+        cv2.imwrite(save_dir + '/reset.jpg', rgb_img)
+        rgb_img_target = cv2.cvtColor(env.target_pic , cv2.COLOR_BGR2RGB)
+        cv2.imwrite(save_dir + '/target.jpg', rgb_img_target)
+        
+        sum_r = 0
+        while True:
+            if is_render:
+                env.render()
+            diff_x = env.obj_pos[0] - env.pos[0]
+            diff_y = env.obj_pos[1] - env.pos[1]
+            if diff_x > step_ds:
+                a = 0 # [1, 0, 0, 0, 0]
+            elif diff_x < 0 and abs(diff_x) >  step_ds:
+                a = 2 # [0, 0 , 1, 0, 0]
+            elif diff_y > step_ds:
+                a = 1 # [0, 1, 0, 0, 0]
+            elif diff_y < 0 and abs(diff_y) >  step_ds:
+                a = 3 # [0, 0 , 0, 1, 0]
+            else:
+                break
+            step_count +=1
+            s,r, d, info =  env.step(a)
+            sum_r += r  
+         
+            rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
+            cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+            
+
+        a = 4 # [0, 0, 0, 0, 1]
+        s,r, d, info =  env.step(a)
+        sum_r += r  
+        print('sum_r = ', sum_r)
+        print("use step = ", step_count)
+
+        env.render()
+
+    print('use time = {:.2f}'.format(time.time()-s_time))
 
 # go_obj_savepic()
 # go_obj()
 
-go_obj_savepic_with_camenv()
+# go_obj_savepic_with_camenv()
+
+go_obj_savepic_siamese()

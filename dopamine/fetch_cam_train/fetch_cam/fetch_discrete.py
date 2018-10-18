@@ -2,6 +2,7 @@ from gym import utils
 from fetch_cam import fetch_env
 import numpy as np 
 from fetch_cam.utils import robot_get_obs
+from mujoco_py.modder import TextureModder
 
 class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     '''
@@ -176,3 +177,74 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         obs = self._get_obs()
 
         return obs, reward, done, None
+
+    # ------------------------for siamese network------------------------
+    def rand_obj0_hide_obj1_obj2(self):
+        # self.sim.set_state(self.initial_state)
+        # self.gripper_to_init()
+        # self.env.rand_objs_color()
+        # rand obj1 pose
+        self.backup_objs_xpos = []
+        for i in range(3):
+            obj_joint_name = 'object%d' % i
+            pos = self.sim.data.get_site_xpos(obj_joint_name).copy()
+            # print('[%d] pos = ' % i , pos)
+            self.backup_objs_xpos.append(pos)
+        
+        object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range*0.5, self.obj_range*0.5, size=2)
+        object_qpos = self.sim.data.get_joint_qpos('object0:joint')
+        assert object_qpos.shape == (7,)
+        object_qpos[:2] = object_xpos
+        self.sim.data.set_joint_qpos('object0:joint', object_qpos)
+        
+        # print('object_qpos = ', object_qpos)
+        # hide obj1, obj2
+        obj_z =  self.default_obj0_pos[2]
+        obj_hide_z = obj_z - 0.15
+
+        # print('obj0 z ', obj_z)
+        for i in range(1,3):
+            obj_joint_name = 'object%d:joint' % i
+            # print("modify ", obj_joint_name)
+            object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
+            assert object_qpos.shape == (7,)
+            object_qpos[2] = obj_hide_z
+
+            self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+
+        self.sim.forward()
+        self._step_callback()
+
+        # self.render()
+        # self.gripper_to_init()
+
+    def rand_objs_color(self):
+        for i in range(3):
+            obj_name = 'object%d' % i
+            # it will fail in first time
+            try:
+                modder = TextureModder(self.sim)
+                # color = np.array([0, 0,255 ]
+                color = np.array(np.random.uniform(size=3) * 255, dtype=np.uint8) 
+                modder.set_rgb(obj_name, color )
+            except Exception as e :
+                pass
+                # print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
+
+        self.sim.forward()
+                
+    def recover_obj0_obj1_obj2_pos(self):
+        # print('len(self.backup_objs_xpos) = ', len(self.backup_objs_xpos))
+
+        for i in range(len(self.backup_objs_xpos)):
+            obj_joint_name = 'object%d:joint' % i
+            object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
+            assert object_qpos.shape == (7,)
+            object_qpos[:3] = self.backup_objs_xpos[i]
+            # print('self.backup_objs_xpos[%d] = ' % i , self.backup_objs_xpos[i])
+            self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+
+        self.sim.forward()
+        self._step_callback()
+
+            
