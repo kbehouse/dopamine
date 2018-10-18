@@ -102,7 +102,8 @@ class OutOfGraphReplayBuffer(object):
                gamma=0.99,
                max_sample_attempts=MAX_SAMPLE_ATTEMPTS,
                extra_storage_types=None,
-               observation_dtype=np.uint8):
+               observation_dtype=np.uint8,
+               two_image_observation = False):
     """Initializes OutOfGraphReplayBuffer.
 
     Args:
@@ -144,9 +145,11 @@ class OutOfGraphReplayBuffer(object):
       self._observation_shape = (observation_shape, observation_shape)
     self._stack_size = stack_size
     print(f'self._observation_shape={self._observation_shape}, len(self._observation_shape)={len(self._observation_shape)}')
-    if len(self._observation_shape) ==3:
+    
+    if len(self._observation_shape) ==4:
+      self._state_shape = (self._observation_shape[0], self._observation_shape[1], self._observation_shape[2], self._observation_shape[3] * self._stack_size)
+    elif len(self._observation_shape) ==3:
       self._state_shape = (self._observation_shape[0], self._observation_shape[1], self._observation_shape[2] * self._stack_size)
-      print(f'self._state_shape={self._state_shape}')
     else:  
       self._state_shape = self._observation_shape + (self._stack_size,)
     
@@ -168,6 +171,8 @@ class OutOfGraphReplayBuffer(object):
     self._cumulative_discount_vector = np.array(
         [math.pow(self._gamma, n) for n in range(update_horizon)],
         dtype=np.float32)
+
+    self.two_image_observation = two_image_observation
 
   def _create_storage(self):
     """Creates the numpy arrays used to store transitions.
@@ -337,14 +342,30 @@ class OutOfGraphReplayBuffer(object):
     return return_array
 
   def get_observation_stack(self, index):
-    state = self.get_range(self._store['observation'],
-                           index - self._stack_size + 1, index + 1)
-    if len(self._state_shape) ==3:
+    state = self.get_range(self._store['observation'], index - self._stack_size + 1, index + 1)
+    
+    # print('len(self._state_shape) =', len(self._state_shape), ', two_image_observation = ', self.two_image_observation)
+    if self.two_image_observation==True and len(self._state_shape) ==4:
+      # self._observation_shape->(2, 128,128,3) self._state_shape ->(2, 128,128,12) 
+      # state shape-> (4, 2, 128, 128, 3), tmp_state shape-> (2, 128, 128, 12)
+      
+      tmp_state = np.zeros(self._state_shape)
+      for i in range(self._stack_size):
+        s_index, e_index = i* self._observation_shape[3], (i+1)* self._observation_shape[3]
+        tmp_state[:, :, :, s_index:e_index] = state[i, :, :, :, :]
+      # print('in two_image_observation,  self._observation_shape = ', self._observation_shape)
+      # print('self._state_shape = ',np.shape(self._state_shape))
+      # print('state shape = ',np.shape(state))
+      # print('tmp_state shape = ',np.shape(tmp_state), ' state[i, :, :, :, :] shape = ', np.shape(state[i, :, :, :, :])) 
+      return tmp_state
+    elif len(self._state_shape) ==3:
+      # print('get_observation_stack() in len(self._state_shape) ==3, state shape = ',np.shape(state))
+      #  self._observation_shape->(128,128,3) , self._state_shape ->(128,128,12) , state shape-> (4, 128, 128, 3), tmp_state shape-> (128, 128, 12)
       tmp_state = np.zeros(self._state_shape)
       for i in range(self._stack_size):
         s_index, e_index = i* self._observation_shape[2], (i+1)* self._observation_shape[2]
-        tmp_state[:, :, s_index:e_index] = state[i,:,:]
-      # print('tmp_state shape = ',np.shape(tmp_state))
+        tmp_state[:, :, s_index:e_index] = state[i,:,:,:]
+      # print('tmp_state shape = ',np.shape(tmp_state), ' state[i,:,:,:] shape = ', np.shape(state[i,:,:,:])) 
       return tmp_state
     else:
       # print('get_observation_stack() state=', np.shape(state), \
@@ -682,7 +703,8 @@ class WrappedReplayBuffer(object):
                wrapped_memory=None,
                max_sample_attempts=MAX_SAMPLE_ATTEMPTS,
                extra_storage_types=None,
-               observation_dtype=np.uint8):
+               observation_dtype=np.uint8,
+               two_image_observation=False):
     """Initializes WrappedReplayBuffer.
 
     Args:
@@ -708,6 +730,7 @@ class WrappedReplayBuffer(object):
       ValueError: If update_horizon is not positive.
       ValueError: If discount factor is not in [0, 1].
     """
+    print('!!!!!!!!!replay_capacity = ', replay_capacity)
     if replay_capacity < update_horizon + 1:
       raise ValueError(
           'Update horizon ({}) should be significantly smaller '
@@ -727,7 +750,8 @@ class WrappedReplayBuffer(object):
           observation_shape, stack_size, replay_capacity, batch_size,
           update_horizon, gamma, max_sample_attempts,
           observation_dtype=observation_dtype,
-          extra_storage_types=extra_storage_types)
+          extra_storage_types=extra_storage_types,
+          two_image_observation=two_image_observation)
 
     self.create_sampling_ops(use_staging)
 

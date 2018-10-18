@@ -199,7 +199,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         
         # print('object_qpos = ', object_qpos)
         # hide obj1, obj2
-        obj_z =  self.default_obj0_pos[2]
+        obj_z =  object_qpos[2]
         obj_hide_z = obj_z - 0.15
 
         # print('obj0 z ', obj_z)

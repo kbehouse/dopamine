@@ -204,7 +204,7 @@ class FetchEnv(robot_env.RobotEnv):
 
             obj_pos_ary = self.generate_3_obj_pos()
             obj_z = self.sim.data.get_joint_qpos('object0:joint')[2]
-            print(obj_pos_ary)
+            # print(obj_pos_ary)
             for i in range(len(obj_pos_ary)):
                 obj_joint_name = 'object%d:joint' % i
                 object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
@@ -213,10 +213,6 @@ class FetchEnv(robot_env.RobotEnv):
                 object_qpos[2] = obj_z if i>=1 else  object_qpos[2]
                     
                 self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
-
-            print('obj_z = ', obj_z)
-
-        
         
         self.sim.forward()
         self.gripper_to_init()

@@ -35,7 +35,8 @@ class FetchDiscreteCamSiamenseEnv:
             return s, r, d, None
         else:
             resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
-            return resize_img, r, d, None
+            # return resize_img, r, d, None
+            return [resize_img, self.target_pic], r, d, None
 
         # return s, r, d, None
 
@@ -69,6 +70,7 @@ class FetchDiscreteCamSiamenseEnv:
             self.env.render()
             # time.sleep(2)
         except Exception as e:
+            print(' Exception e -> ', e )
             pass
             # print(' Exception e -> ', e )
         
@@ -106,8 +108,7 @@ class FetchDiscreteCamSiamenseEnv:
             return s
         else:
             resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
-            return resize_img
-            
+            return [resize_img, self.target_pic]
 
     def render(self):
         self.env.render()

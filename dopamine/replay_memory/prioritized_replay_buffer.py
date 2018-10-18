@@ -48,7 +48,8 @@ class OutOfGraphPrioritizedReplayBuffer(
                gamma=0.99,
                max_sample_attempts=circular_replay_buffer.MAX_SAMPLE_ATTEMPTS,
                extra_storage_types=None,
-               observation_dtype=np.uint8):
+               observation_dtype=np.uint8,
+               two_image_observation = False):
     """Initializes OutOfGraphPrioritizedReplayBuffer.
 
     Args:
@@ -75,7 +76,8 @@ class OutOfGraphPrioritizedReplayBuffer(
         gamma=gamma,
         max_sample_attempts=max_sample_attempts,
         extra_storage_types=extra_storage_types,
-        observation_dtype=observation_dtype)
+        observation_dtype=observation_dtype,
+        two_image_observation = two_image_observation)
 
     self.sum_tree = sum_tree.SumTree(replay_capacity)
 
@@ -259,7 +261,8 @@ class WrappedPrioritizedReplayBuffer(
                gamma=0.99,
                max_sample_attempts=circular_replay_buffer.MAX_SAMPLE_ATTEMPTS,
                extra_storage_types=None,
-               observation_dtype=np.uint8):
+               observation_dtype=np.uint8,
+               two_image_observation=False):
     """Initializes WrappedPrioritizedReplayBuffer.
 
     Args:
@@ -286,7 +289,8 @@ class WrappedPrioritizedReplayBuffer(
     memory = OutOfGraphPrioritizedReplayBuffer(
         observation_shape, stack_size, replay_capacity, batch_size,
         update_horizon, gamma, max_sample_attempts,
-        extra_storage_types=extra_storage_types)
+        extra_storage_types=extra_storage_types,
+        two_image_observation = two_image_observation)
     super(WrappedPrioritizedReplayBuffer, self).__init__(
         observation_shape,
         stack_size,
@@ -296,7 +300,8 @@ class WrappedPrioritizedReplayBuffer(
         update_horizon,
         gamma,
         wrapped_memory=memory,
-        extra_storage_types=extra_storage_types)
+        extra_storage_types=extra_storage_types,
+        two_image_observation=two_image_observation)
 
   def tf_set_priority(self, indices, priorities):
     """Sets the priorities for the given indices.

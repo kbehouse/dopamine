@@ -233,17 +233,15 @@ def go_obj_savepic_siamese(is_render = True):
 
     for i in range(5):
         obs = env.reset()
-        
-            
-        # env.gripper_close(False)
         env.render()
         save_dir = 'tmp/z_fetch_run_pic_%02d' %i 
         create_dir(save_dir)
         step_count = 0
         print('------start ep %03d--------' % i)
-        rgb_img = cv2.cvtColor(obs, cv2.COLOR_BGR2RGB)
+        rgb_img = cv2.cvtColor(obs[0], cv2.COLOR_BGR2RGB)
         cv2.imwrite(save_dir + '/reset.jpg', rgb_img)
-        rgb_img_target = cv2.cvtColor(env.target_pic , cv2.COLOR_BGR2RGB)
+        # if env.target_pic!=None:
+        rgb_img_target = cv2.cvtColor(env.target_pic , cv2.COLOR_BGR2RGB) 
         cv2.imwrite(save_dir + '/target.jpg', rgb_img_target)
         
         sum_r = 0
@@ -266,8 +264,10 @@ def go_obj_savepic_siamese(is_render = True):
             s,r, d, info =  env.step(a)
             sum_r += r  
          
-            rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
+            rgb_img = cv2.cvtColor(s[0], cv2.COLOR_BGR2RGB)
             cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+            rgb_img = cv2.cvtColor(s[1], cv2.COLOR_BGR2RGB)
+            cv2.imwrite(save_dir + '/%03d_target.jpg' % step_count, rgb_img)
             
 
         a = 4 # [0, 0, 0, 0, 1]

@@ -164,7 +164,7 @@ class DQNAgent(object):
       self._train_op = self._build_train_op()
       self._sync_qt_ops = self._build_sync_op()
 
-      print('self.state_ph= ', self.state_ph)
+      # print('self.state_ph= ', self.state_ph)
 
     if self.summary_writer is not None:
       # All tf.summaries should have been defined prior to running this.
@@ -230,9 +230,9 @@ class DQNAgent(object):
     # approximation scheme.
     self._q_argmax = tf.argmax(self._net_outputs.q_values, axis=1)[0]
 
-    print('before self.online_convnet(self._replay.states)')
+    print('---before self.online_convnet(self._replay.states), self._replay.states = ', self._replay.states)
     self._replay_net_outputs = self.online_convnet(self._replay.states)
-    print('before self.target_convnet(self._replay.next_states))')
+    print('---before self.target_convnet(self._replay.next_states)), self._replay.next_states = ', self._replay.next_states)
     self._replay_next_target_net_outputs = self.target_convnet(
         self._replay.next_states)
 
@@ -426,10 +426,6 @@ class DQNAgent(object):
     # Swap out the oldest frame with the current frame.
     self.state = np.roll(self.state, -1, axis=3)
     self.state[0, :, :, -1] = self._observation
-
-    print('observation.shape = ', np.shape(observation)) # observation.shape =  (84, 84, 1)
-    print('np.shape(self.state) = ', np.shape(self.state)) # self.state =  (1, 84, 84, 4)
-    print('self._observation.shape = ', np.shape(self._observation)) # self._observation.shape =  (84, 84)
 
 
   def _store_transition(self, last_observation, action, reward, is_terminal):

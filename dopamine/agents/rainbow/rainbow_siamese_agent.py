@@ -15,10 +15,15 @@ import tensorflow as tf
 
 import gin.tf
 import random
+import math
+from dopamine.replay_memory import circular_replay_buffer
 slim = tf.contrib.slim
 
 
-TWO_IMG_OBSERVATION_SHAPE = (2, 84, 84)
+# TWO_IMG_OBSERVATION_SHAPE = (1, 84, 84, 3)
+STATE_W_H = 128
+dqn_agent.OBSERVATION_SHAPE = (2, STATE_W_H, STATE_W_H, 3) 
+dqn_agent.STACK_SIZE = 4
 
 @gin.configurable
 class RainbowSiameseAgent(RainbowAgent):
@@ -46,45 +51,88 @@ class RainbowSiameseAgent(RainbowAgent):
                summary_writer=None,
                summary_writing_frequency=500):
 
+
+
+    print('--------in RainbowRGBAgent------')
+    print('min_replay_history = ', min_replay_history)
+    # tf.logging.info('Creating %s agent with the following parameters:',
+    #                 self.__class__.__name__)
+    # tf.logging.info('\t gamma: %f', gamma)
+    # tf.logging.info('\t update_horizon: %f', update_horizon)
+    # tf.logging.info('\t min_replay_history: %d', min_replay_history)
+    # tf.logging.info('\t update_period: %d', update_period)
+    # tf.logging.info('\t target_update_period: %d', target_update_period)
+    # tf.logging.info('\t epsilon_train: %f', epsilon_train)
+    # tf.logging.info('\t epsilon_eval: %f', epsilon_eval)
+    # tf.logging.info('\t epsilon_decay_period: %d', epsilon_decay_period)
+    # tf.logging.info('\t tf_device: %s', tf_device)
+    # tf.logging.info('\t use_staging: %s', use_staging)
+    # tf.logging.info('\t optimizer: %s', optimizer)
+    # We need this because some tools convert round floats into ints.
+    vmax = float(vmax)
+    self._num_atoms = num_atoms
+    self._support = tf.linspace(-vmax, vmax, num_atoms)
+    self._replay_scheme = replay_scheme
+    # TODO(b/110897128): Make agent optimizer attribute private.
+    self.optimizer = optimizer
+    
+
+    self.num_actions = num_actions
+    self.gamma = gamma
+    self.update_horizon = update_horizon
+    self.cumulative_gamma = math.pow(gamma, update_horizon)
+    self.min_replay_history = min_replay_history
+    self.target_update_period = target_update_period
+    self.epsilon_fn = epsilon_fn
+    self.epsilon_train = epsilon_train
+    self.epsilon_eval = epsilon_eval
+    self.epsilon_decay_period = epsilon_decay_period
+    self.update_period = update_period
+    self.eval_mode = False
+    self.training_steps = 0
+    self.optimizer = optimizer
+    self.summary_writer = summary_writer
+    self.summary_writing_frequency = summary_writing_frequency
+
     with tf.device(tf_device):
-      state_shape = [1, dqn_agent.OBSERVATION_SHAPE, dqn_agent.OBSERVATION_SHAPE, dqn_agent.STACK_SIZE]
-      self.state_second = np.zeros(state_shape)
-      self.state_second_ph = tf.placeholder(tf.uint8, state_shape, name='state_second_ph')
-    super(RainbowSiameseAgent, self).__init__(
-        sess=sess,
-        num_actions=num_actions,
-        num_atoms=num_atoms,
-        vmax=vmax,
-        gamma=gamma,
-        update_horizon=update_horizon,
-        min_replay_history=min_replay_history,
-        update_period=update_period,
-        target_update_period=target_update_period,
-        epsilon_fn=epsilon_fn,
-        epsilon_train=epsilon_train,
-        epsilon_eval=epsilon_eval,
-        epsilon_decay_period=epsilon_decay_period,
-        replay_scheme=replay_scheme,
-        tf_device=tf_device,
-        use_staging=use_staging,
-        optimizer=self.optimizer,
-        summary_writer=summary_writer,
-        summary_writing_frequency=summary_writing_frequency)
+      state_shape = [1, dqn_agent.OBSERVATION_SHAPE [0], dqn_agent.OBSERVATION_SHAPE[1],dqn_agent.OBSERVATION_SHAPE[2], dqn_agent.OBSERVATION_SHAPE[3] * dqn_agent.STACK_SIZE]
+      self.state = np.zeros(state_shape)
+      self.state_ph = tf.placeholder(tf.uint8, state_shape, name='state_ph')
+
+      self._replay = self._build_replay_buffer(use_staging)
+
+      self._build_networks()
+
+      self._train_op = self._build_train_op()
+      self._sync_qt_ops = self._build_sync_op()
+
+      print('self.state_ph= ', self.state_ph)
+
+    if self.summary_writer is not None:
+      # All tf.summaries should have been defined prior to running this.
+      self._merged_summaries = tf.summary.merge_all()
+    self._sess = sess
+    self._saver = tf.train.Saver(max_to_keep=3)
+
+    # Variables to be initialized by the agent once it interacts with the
+    # environment.
+    self._observation = None
+    self._last_observation = None
+
 
   def _network_template(self, state):
-    """Builds a convolutional network that outputs Q-value distributions.
-
-    Args:
-      state: `tf.Tensor`, contains the agent's current state.
-
-    Returns:
-      net: _network_type object containing the tensors output by the network.
-    """
     weights_initializer = slim.variance_scaling_initializer(
         factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
 
-    first_state = state[0]
-    second_state = state[1]
+    # first_state  = state[0]
+    # first_state  = tf.expand_dims(first_state, 0)
+    # second_state = state[1]
+    # second_state = tf.expand_dims(second_state, 0)
+    first_state  = state[:,0,:,:]
+    second_state = state[:,1,:,:]
+    print('state shape = ', state.shape)
+    print('first_state shape = ', first_state.shape)
+    print('second_state shape = ', second_state.shape)
     # first network
     first_net = tf.cast(first_state, tf.float32)
     first_net = tf.div(first_net, 255.)
@@ -132,115 +180,28 @@ class RainbowSiameseAgent(RainbowAgent):
     probabilities = tf.contrib.layers.softmax(logits)
     q_values = tf.reduce_sum(self._support * probabilities, axis=2)
     return self._get_network_type()(q_values, logits, probabilities)
-  
-  '''
-  def _network_template(self, state, second_state):
-    """Builds a convolutional network that outputs Q-value distributions.
+
+  def _record_observation(self, observation):
+    """Records an observation and update state.
+
+    Extracts a frame from the observation vector and overwrites the oldest
+    frame in the state buffer.
 
     Args:
-      state: `tf.Tensor`, contains the agent's current state.
-
-    Returns:
-      net: _network_type object containing the tensors output by the network.
+    observation: numpy array, an observation from the environment.
     """
-    weights_initializer = slim.variance_scaling_initializer(
-        factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
+    # print('in rainbow_rgb_agent _record_observation')
+    
+    # Set current observation. Represents an 84 x 84 x 1 image frame.
+    self._observation = observation
+    # Swap out the oldest frame with the current frame.
+    self.state = np.roll(self.state, -3, axis=4)
+    self.state[0, :, :, :, -3:] = self._observation
 
-    # first network
-    first_net = tf.cast(state, tf.float32)
-    first_net = tf.div(first_net, 255.)
-    first_net = slim.conv2d(
-        first_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
-    first_net = slim.conv2d(
-        first_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
-    first_net = slim.conv2d(
-        first_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
-    first_net = slim.flatten(first_net)
-    first_net = slim.fully_connected(
-        first_net, 512, weights_initializer=weights_initializer)
+    # print('observation.shape = ', np.shape(observation)) # observation.shape =  (2, 256, 256, 3)
+    # print('np.shape(self.state) = ', np.shape(self.state)) # self.state =  (1, 2, 256, 256, 12)
+    # print('self._observation.shape = ', np.shape(self._observation)) # self._observation.shape =  (256, 256, 3)
 
-    # second network
-    second_net = tf.cast(second_state, tf.float32)
-    second_net = tf.div(second_net, 255.)
-    second_net = slim.conv2d(
-        second_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
-    second_net = slim.conv2d(
-        second_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
-    second_net = slim.conv2d(
-        second_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
-    second_net = slim.flatten(second_net)
-    second_net = slim.fully_connected(
-        second_net, 512, weights_initializer=weights_initializer)
-
-    net = tf.concat([first_net, second_net], axis=1)
-
-    print('first_net', first_net)
-    print('second_net', second_net)
-    print('net', net)
-
-    net = slim.fully_connected(
-        net, 512, weights_initializer=weights_initializer)
-
-    print('net', net)
-
-    net = slim.fully_connected(
-        net,
-        self.num_actions * self._num_atoms,
-        activation_fn=None,
-        weights_initializer=weights_initializer)
-
-    logits = tf.reshape(net, [-1, self.num_actions, self._num_atoms])
-    probabilities = tf.contrib.layers.softmax(logits)
-    q_values = tf.reduce_sum(self._support * probabilities, axis=2)
-    return self._get_network_type()(q_values, logits, probabilities)
-  
-  def _select_action(self):
-    """Select an action from the set of available actions.
-
-    Chooses an action randomly with probability self._calculate_epsilon(), and
-    otherwise acts greedily according to the current Q-value estimates.
-
-    Returns:
-       int, the selected action.
-    """
-    print('in RainbowSiameseAgent _select_action')
-    epsilon = self.epsilon_eval if self.eval_mode else self.epsilon_fn(
-        self.epsilon_decay_period,
-        self.training_steps,
-        self.min_replay_history,
-        self.epsilon_train)
-    if random.random() <= epsilon:
-      # Choose a random action with probability epsilon.
-      return random.randint(0, self.num_actions - 1)
-    else:
-      # Choose the action with highest Q-value at the current state.
-      return self._sess.run(self._q_argmax, {self.state_ph: self.state,  \
-                                             self.state_second_ph: self.state_second})
-
-  def _build_networks(self):
-    """Builds the Q-value network computations needed for acting and training.
-
-    These are:
-      self.online_convnet: For computing the current state's Q-values.
-      self.target_convnet: For computing the next state's target Q-values.
-      self._net_outputs: The actual Q-values.
-      self._q_argmax: The action maximizing the current state's Q-values.
-      self._replay_net_outputs: The replayed states' Q-values.
-      self._replay_next_target_net_outputs: The replayed next states' target
-        Q-values (see Mnih et al., 2015 for details).
-    """
-    # Calling online_convnet will generate a new graph as defined in
-    # self._get_network_template using whatever input is passed, but will always
-    # share the same weights.
-    self.online_convnet = tf.make_template('Online', self._network_template)
-    self.target_convnet = tf.make_template('Target', self._network_template)
-    self._net_outputs = self.online_convnet(self.state_ph, self.state_second_ph)
-    # TODO(bellemare): Ties should be broken. They are unlikely to happen when
-    # using a deep network, but may affect performance with a linear
-    # approximation scheme.
-    self._q_argmax = tf.argmax(self._net_outputs.q_values, axis=1)[0]
-
-    self._replay_net_outputs = self.online_convnet(self._replay.states)
-    self._replay_next_target_net_outputs = self.target_convnet(
-        self._replay.next_states)
-  '''
+    # print('observation.shape = ', np.shape(observation)) # observation.shape =  (256, 256, 3)
+    # print('np.shape(self.state) = ', np.shape(self.state)) # self.state =  (1, 256, 256, 12)
+    # print('self._observation.shape = ', np.shape(self._observation)) # self._observation.shape =  (256, 256, 3)
