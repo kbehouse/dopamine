@@ -151,7 +151,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 diff_reward = 'DIFF' if grip_close_reward!=reward else 'SAME' 
                 print(f'grip_close_reward = {grip_close_reward}, reward={reward}, {diff_reward}')
                 import time
-                for i in range(1, 100):
+                for i in range(1, 10):
                     # print('in render 0.01, i = ', i)
                     # time.sleep(0.01)
                     # self.gripper_close()

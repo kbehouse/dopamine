@@ -5,8 +5,8 @@ import numpy as np
 import time
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamSiamenseEnv:
-    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True):
-        self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005)
+    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, is_render=False):
+        self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, is_render = is_render)
         self.gray_img = gray_img
 
         self.target_pic = None

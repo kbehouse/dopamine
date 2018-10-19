@@ -227,12 +227,15 @@ def go_obj_savepic_siamese(is_render = True):
     create_dir(save_dir)
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
+    env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False, is_render=True)
     s_time = time.time()
+    all_ep_steps = 0
 
+    for i in range(10):
 
-    for i in range(5):
+        # tmp_s_t = time.time() 
         obs = env.reset()
+        # print('reset use time  =' , time.time() - tmp_s_t)
         env.render()
         save_dir = 'tmp/z_fetch_run_pic_%02d' %i 
         create_dir(save_dir)
@@ -275,11 +278,15 @@ def go_obj_savepic_siamese(is_render = True):
         sum_r += r  
         print('sum_r = ', sum_r)
         print("use step = ", step_count)
-
+        all_ep_steps+=step_count
         env.render()
 
-    print('use time = {:.2f}'.format(time.time()-s_time))
+        # for_end = time.time() 
 
+    use_time = time.time()-s_time
+    print('use time = {:.2f}'.format(use_time))
+    print('steps / second = {:.2f}'.format(all_ep_steps / use_time))
+    
 # go_obj_savepic()
 # go_obj()
 
