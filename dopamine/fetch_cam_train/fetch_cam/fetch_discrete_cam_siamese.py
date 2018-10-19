@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import time
 # because thread bloack the image catch (maybe), so create the shell class 
+
+IMG_W_H = 84
 class FetchDiscreteCamSiamenseEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, is_render=False):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, is_render = is_render)
@@ -34,7 +36,7 @@ class FetchDiscreteCamSiamenseEnv:
             s = self.state_preprocess(rgb_gripper)
             return s, r, d, None
         else:
-            resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
+            resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
             # return resize_img, r, d, None
             return [resize_img, self.target_pic], r, d, None
 
@@ -63,7 +65,7 @@ class FetchDiscreteCamSiamenseEnv:
                         mode='offscreen', device_id=-1)
             rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
                 mode='offscreen', device_id=-1)
-            resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
+            resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
             self.target_pic = resize_img.copy()
 
             self.env.recover_obj0_obj1_obj2_pos()
@@ -87,7 +89,7 @@ class FetchDiscreteCamSiamenseEnv:
         #                 mode='offscreen', device_id=-1)
         #     rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
         #         mode='offscreen', device_id=-1)
-        #     resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
+        #     resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
         #     self.target_pic = resize_img
         # except Exception as e:
         #     print(' Exception e -> ', e )
@@ -107,7 +109,7 @@ class FetchDiscreteCamSiamenseEnv:
             s = self.state_preprocess(rgb_gripper)
             return s
         else:
-            resize_img = cv2.resize(rgb_gripper, (128, 128), interpolation=cv2.INTER_AREA)
+            resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
             return [resize_img, self.target_pic]
 
     def render(self):

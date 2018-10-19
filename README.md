@@ -23,6 +23,14 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_siamese_128_5kQupdate \
   --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin'
 ```
+
+
+```
+python -um dopamine.fetch_cam_train.train_siamese \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_siamese_84 \
+  --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin'
+```
 ### Acknowledgement
 
 If you use Dopamine in your work, we ask that you cite this repository as a
