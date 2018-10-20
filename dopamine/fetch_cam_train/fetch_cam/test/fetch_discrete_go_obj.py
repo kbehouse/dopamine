@@ -12,6 +12,7 @@ from fsm import FSM
 import cv2
 from PIL import Image
 import os, shutil
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
 
 def create_dir(dir_name):
     if os.path.exists(dir_name):
@@ -240,11 +241,25 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False):
         create_dir(save_dir)
         step_count = 0
         print('------start ep %03d--------' % i)
-        rgb_img = cv2.cvtColor(obs[0], cv2.COLOR_BGR2RGB)
-        cv2.imwrite(save_dir + '/reset.jpg', rgb_img)
-        # if env.target_pic!=None:
-        rgb_img_target = cv2.cvtColor(env.target_pic , cv2.COLOR_BGR2RGB) 
-        cv2.imwrite(save_dir + '/target.jpg', rgb_img_target)
+
+        if hsv_color:
+            obs[0] = hsv_to_rgb(obs[0])*255.0
+            obs[1] = hsv_to_rgb(obs[1])*255.0
+        
+            obs[0] = obs[0].astype(int)
+            obs[1] = obs[1].astype(int)
+            # print('obs[0]=' , obs[0])
+            # print('np.shape(obs[0]) = ',np.shape(obs[0]))
+
+            cv2.imwrite(save_dir + '/reset.jpg', obs[0])
+            cv2.imwrite(save_dir + '/target.jpg', obs[1])
+
+        else:
+            rgb_img = cv2.cvtColor(obs[0], cv2.COLOR_BGR2RGB)
+            cv2.imwrite(save_dir + '/reset.jpg', rgb_img)
+            # if env.target_pic!=None:
+            rgb_img_target = cv2.cvtColor(obs[1] , cv2.COLOR_BGR2RGB) 
+            cv2.imwrite(save_dir + '/target.jpg', rgb_img_target)
         
         sum_r = 0
         while True:
@@ -267,14 +282,32 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False):
             sum_r += r  
          
             prefix = ''
-            # if hsv_color:
-            #     prefix = 'hsv_'
-            #     s[0] = cv2.cvtColor(s[0], cv2.COLOR_HSV2BGR)
-            #     s[1] = cv2.cvtColor(s[1], cv2.COLOR_HSV2BGR)
-            rgb_img = cv2.cvtColor(s[0], cv2.COLOR_BGR2RGB)
-            cv2.imwrite(save_dir + '/%s%03d.jpg' % (prefix, step_count) , rgb_img)
-            rgb_img = cv2.cvtColor(s[1], cv2.COLOR_BGR2RGB)
-            cv2.imwrite(save_dir + '/%s%03d_target.jpg' % (prefix, step_count) , rgb_img)
+            if hsv_color:
+                prefix = 'hsv_'
+                # s[0] = cv2.cvtColor(s[0], cv2.COLOR_HSV2BGR)
+                # s[1] = cv2.cvtColor(s[1], cv2.COLOR_HSV2BGR)
+                # print('s[0] -> ', s[0])
+                # print('s[1] -> ', s[1])
+                s[0] = hsv_to_rgb(s[0])*255.0
+                s[1] = hsv_to_rgb(s[1])*255.0
+                s[0] = s[0].astype(int)
+                s[1] = s[1].astype(int)
+                s[0] = s[0][...,::-1]
+                s[1] = s[1][...,::-1]
+                # print('s[0] shape -> ', np.shape(s[0]) , 'data -> ',s[0])
+                # print('s[1] shape -> ', np.shape(s[1]) , 'data -> ', s[1])
+
+                cv2.imwrite(save_dir + '/%s%03d.jpg' % (prefix, step_count) , s[0])
+                cv2.imwrite(save_dir + '/%s%03d_target.jpg' % (prefix, step_count) , s[1])
+
+            else:
+                # print('s[0] shape -> ', np.shape(s[0]) , 'data -> ',s[0])
+                # print('s[1] shape -> ', np.shape(s[1]) , 'data -> ', s[1])
+                
+                rgb_img = cv2.cvtColor(s[0], cv2.COLOR_BGR2RGB)
+                cv2.imwrite(save_dir + '/%s%03d.jpg' % (prefix, step_count) , rgb_img)
+                rgb_img = cv2.cvtColor(s[1], cv2.COLOR_BGR2RGB)
+                cv2.imwrite(save_dir + '/%s%03d_target.jpg' % (prefix, step_count) , rgb_img)
             
 
         a = 4 # [0, 0, 0, 0, 1]

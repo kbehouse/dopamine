@@ -5,6 +5,7 @@ import numpy as np
 import time
 import tensorflow as tf
 # because thread bloack the image catch (maybe), so create the shell class 
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
 
 IMG_W_H = 84
 class FetchDiscreteCamSiamenseEnv:
@@ -17,8 +18,16 @@ class FetchDiscreteCamSiamenseEnv:
 
     def img_preprocess(self, img):
         # not support gray image
-        resize_img = cv2.resize(img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
-        return resize_img
+        
+        if self.hsv_color:
+            resize_img = cv2.resize(img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
+            resize_img = resize_img/255.0
+            # print('resize_img = ', resize_img)
+            hsv_img = rgb_to_hsv(resize_img)
+            return hsv_img
+        else:            
+            resize_img = cv2.resize(img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
+            return resize_img
         
     def step(self,action):
         # print('i action = ', action)

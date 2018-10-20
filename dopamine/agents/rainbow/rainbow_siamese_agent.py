@@ -136,11 +136,14 @@ class RainbowSiameseAgent(RainbowAgent):
     print('second_state shape = ', second_state.shape)
     # first network
     first_net = tf.cast(first_state, tf.float32)
-    if self.hsv_color:
-        first_net_rgb_float = tf.image.convert_image_dtype(first_net, tf.float32)
-        first_net = tf.image.rgb_to_hsv(first_net_rgb_float)  
-    else: # rgb color
+    if not self.hsv_color:
         first_net = tf.div(first_net, 255.)
+    # if self.hsv_color:
+    #     print('Network uses HSV Color!!!')
+    #     first_net_rgb_float = tf.image.convert_image_dtype(first_net, tf.float32)
+    #     first_net = tf.image.rgb_to_hsv(first_net_rgb_float)  
+    # else: # rgb color
+    #     first_net = tf.div(first_net, 255.)
     first_net = slim.conv2d(
         first_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     first_net = slim.conv2d(
@@ -153,11 +156,13 @@ class RainbowSiameseAgent(RainbowAgent):
 
     # second network
     second_net = tf.cast(second_state, tf.float32)
-    if self.hsv_color:
-        second_net_rgb_float = tf.image.convert_image_dtype(second_net, tf.float32)
-        second_net = tf.image.rgb_to_hsv(second_net_rgb_float)  
-    else: # rgb color
+    if not self.hsv_color:
         second_net = tf.div(second_net, 255.)
+    # if self.hsv_color:
+    #     second_net_rgb_float = tf.image.convert_image_dtype(second_net, tf.float32)
+    #     second_net = tf.image.rgb_to_hsv(second_net_rgb_float)  
+    # else: # rgb color
+    #     second_net = tf.div(second_net, 255.)
     second_net = slim.conv2d(
         second_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     second_net = slim.conv2d(

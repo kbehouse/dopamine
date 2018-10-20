@@ -87,7 +87,7 @@ def create_agent(sess, environment, summary_writer=None):
   elif FLAGS.agent_name == 'rainbow':
     return rainbow_siamese_agent.RainbowSiameseAgent(
         sess, num_actions=5,
-        summary_writer=summary_writer)
+        summary_writer=summary_writer, hsv_color=True)
   elif FLAGS.agent_name == 'implicit_quantile':
     return implicit_quantile_agent.ImplicitQuantileAgent(
         sess, num_actions=5,
