@@ -7,7 +7,7 @@ import tensorflow as tf
 # because thread bloack the image catch (maybe), so create the shell class 
 from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
 
-IMG_W_H = 84
+IMG_W_H = 128
 class FetchDiscreteCamSiamenseEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, hsv_color = False, is_render=False):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, is_render = is_render)
