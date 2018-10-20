@@ -27,7 +27,7 @@ from dopamine.agents.rainbow import rainbow_siamese_agent
 from dopamine.fetch_cam_train import run_experiment_siamese
 
 import tensorflow as tf
-
+from fetch_cam.fetch_discrete_cam_siamese import FetchDiscreteCamSiamenseEnv
 
 flags.DEFINE_bool('debug_mode', False,
                   'If set to true, the agent will output in-episode statistics '
@@ -52,9 +52,17 @@ flags.DEFINE_string(
     'Runner. Supported choices are '
     '{continuous_train, continuous_train_and_eval}.')
 
+flags.DEFINE_bool('hsv', False,
+                  'If set to true, the agent will use hsv color, and the '
+                  'and the environment generate color cube use hsv (only 3603 colors)')
+
 FLAGS = flags.FLAGS
 
 
+def create_fetch_cam_environment():
+  print('FLAGS.hsv = ', FLAGS.hsv)
+  env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False, hsv_color=FLAGS.hsv)
+  return env
 
 def create_agent(sess, environment, summary_writer=None):
   """Creates a DQN agent.
@@ -105,10 +113,12 @@ def create_runner(base_dir, create_agent_fn):
   assert base_dir is not None
   # Continuously runs training and evaluation until max num_iterations is hit.
   if FLAGS.schedule == 'continuous_train_and_eval':
-    return run_experiment_siamese.Runner(base_dir, create_agent_fn)
+    return run_experiment_siamese.Runner(base_dir, create_agent_fn,
+        create_environment_fn=create_fetch_cam_environment)
   # Continuously runs training until max num_iterations is hit.
   elif FLAGS.schedule == 'continuous_train':
-    return run_experiment_siamese.TrainRunner(base_dir, create_agent_fn)
+    return run_experiment_siamese.TrainRunner(base_dir, create_agent_fn,
+        create_environment_fn=create_fetch_cam_environment)
   else:
     raise ValueError('Unknown schedule: {}'.format(FLAGS.schedule))
 

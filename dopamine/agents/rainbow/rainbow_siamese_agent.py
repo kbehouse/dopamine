@@ -20,7 +20,6 @@ from dopamine.replay_memory import circular_replay_buffer
 slim = tf.contrib.slim
 
 
-# TWO_IMG_OBSERVATION_SHAPE = (1, 84, 84, 3)
 STATE_W_H = 84
 dqn_agent.OBSERVATION_SHAPE = (2, STATE_W_H, STATE_W_H, 3) 
 dqn_agent.STACK_SIZE = 4
@@ -49,7 +48,8 @@ class RainbowSiameseAgent(RainbowAgent):
                optimizer=tf.train.AdamOptimizer(
                    learning_rate=0.00025, epsilon=0.0003125),
                summary_writer=None,
-               summary_writing_frequency=500):
+               summary_writing_frequency=500, 
+               hsv_color = False):
 
 
 
@@ -94,6 +94,7 @@ class RainbowSiameseAgent(RainbowAgent):
     self.summary_writer = summary_writer
     self.summary_writing_frequency = summary_writing_frequency
 
+    self.hsv_color = hsv_color
     with tf.device(tf_device):
       state_shape = [1, dqn_agent.OBSERVATION_SHAPE [0], dqn_agent.OBSERVATION_SHAPE[1],dqn_agent.OBSERVATION_SHAPE[2], dqn_agent.OBSERVATION_SHAPE[3] * dqn_agent.STACK_SIZE]
       self.state = np.zeros(state_shape)
@@ -118,7 +119,7 @@ class RainbowSiameseAgent(RainbowAgent):
     # environment.
     self._observation = None
     self._last_observation = None
-
+    
 
   def _network_template(self, state):
     weights_initializer = slim.variance_scaling_initializer(
@@ -135,7 +136,11 @@ class RainbowSiameseAgent(RainbowAgent):
     print('second_state shape = ', second_state.shape)
     # first network
     first_net = tf.cast(first_state, tf.float32)
-    first_net = tf.div(first_net, 255.)
+    if self.hsv_color:
+        first_net_rgb_float = tf.image.convert_image_dtype(first_net, tf.float32)
+        first_net = tf.image.rgb_to_hsv(first_net_rgb_float)  
+    else: # rgb color
+        first_net = tf.div(first_net, 255.)
     first_net = slim.conv2d(
         first_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     first_net = slim.conv2d(
@@ -148,7 +153,11 @@ class RainbowSiameseAgent(RainbowAgent):
 
     # second network
     second_net = tf.cast(second_state, tf.float32)
-    second_net = tf.div(second_net, 255.)
+    if self.hsv_color:
+        second_net_rgb_float = tf.image.convert_image_dtype(second_net, tf.float32)
+        second_net = tf.image.rgb_to_hsv(second_net_rgb_float)  
+    else: # rgb color
+        second_net = tf.div(second_net, 255.)
     second_net = slim.conv2d(
         second_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     second_net = slim.conv2d(

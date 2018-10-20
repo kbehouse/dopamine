@@ -11,12 +11,10 @@ from fetch_cam.fetch_discrete_cam_siamese import FetchDiscreteCamSiamenseEnv
 from fsm import FSM
 import cv2
 from PIL import Image
-
+import os, shutil
 
 def create_dir(dir_name):
-    import os
     if os.path.exists(dir_name):
-       import shutil
        shutil.rmtree(dir_name) 
     os.makedirs(dir_name)
 
@@ -222,12 +220,13 @@ def go_obj_savepic_with_camenv(is_render = True):
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
-def go_obj_savepic_siamese(is_render = True):
-    save_dir = 'z_fetch_run_pic'
-    create_dir(save_dir)
+def go_obj_savepic_siamese(is_render = True, hsv_color = False):
+    if os.path.exists('tmp/'):
+        shutil.rmtree('tmp/') 
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False, is_render=True)
+    env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, 
+                        gray_img=False, is_render=True, hsv_color = hsv_color)
     s_time = time.time()
     all_ep_steps = 0
 
@@ -267,10 +266,15 @@ def go_obj_savepic_siamese(is_render = True):
             s,r, d, info =  env.step(a)
             sum_r += r  
          
+            prefix = ''
+            # if hsv_color:
+            #     prefix = 'hsv_'
+            #     s[0] = cv2.cvtColor(s[0], cv2.COLOR_HSV2BGR)
+            #     s[1] = cv2.cvtColor(s[1], cv2.COLOR_HSV2BGR)
             rgb_img = cv2.cvtColor(s[0], cv2.COLOR_BGR2RGB)
-            cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+            cv2.imwrite(save_dir + '/%s%03d.jpg' % (prefix, step_count) , rgb_img)
             rgb_img = cv2.cvtColor(s[1], cv2.COLOR_BGR2RGB)
-            cv2.imwrite(save_dir + '/%03d_target.jpg' % step_count, rgb_img)
+            cv2.imwrite(save_dir + '/%s%03d_target.jpg' % (prefix, step_count) , rgb_img)
             
 
         a = 4 # [0, 0, 0, 0, 1]
@@ -291,5 +295,5 @@ def go_obj_savepic_siamese(is_render = True):
 # go_obj()
 
 # go_obj_savepic_with_camenv()
-
-go_obj_savepic_siamese()
+# go_obj_savepic_siamese()
+go_obj_savepic_siamese(hsv_color=True)

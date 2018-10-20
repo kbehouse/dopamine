@@ -3,6 +3,8 @@ from fetch_cam import fetch_env
 import numpy as np 
 from fetch_cam.utils import robot_get_obs
 from mujoco_py.modder import TextureModder
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
+import random
 
 class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     '''
@@ -232,6 +234,37 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 # print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
 
         self.sim.forward()
+
+
+    def rand_objs_hsv(self):
+        
+        if not hasattr(self, 'color_space'):
+            # only catch 3603 colors
+            self.color_space = []
+            HUE_MAX = 180
+            for h in np.linspace(0,1,HUE_MAX,endpoint=False):
+                for s in np.linspace(0.1, 1.0, 10,endpoint=True):
+                    for v in [0.5,1.0]:
+                        self.color_space.append([h, s, v])
+            self.color_space.append([0,0,  0])
+            self.color_space.append([0,0,0.5])
+            self.color_space.append([0,0,1.0])
+
+        try:
+            hsv_3 = random.sample(self.color_space, 3)
+
+            for i in range(3):
+                rgb = hsv_to_rgb( hsv_3[i] )* 255.0
+                rgb = rgb.astype(int)
+                # print('hsv = ', hsv_3[i], ', rgb=', rgb)
+                obj_name = 'object%d' % i
+                modder = TextureModder(self.sim)
+                modder.set_rgb(obj_name, rgb )
+        except Exception as e :
+            # pass
+            print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
+
+
                 
     def recover_obj0_obj1_obj2_pos(self):
         # print('len(self.backup_objs_xpos) = ', len(self.backup_objs_xpos))

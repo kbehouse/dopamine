@@ -31,7 +31,6 @@ import gym
 import numpy as np
 import tensorflow as tf
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
-from fetch_cam.fetch_discrete_cam_siamese import FetchDiscreteCamSiamenseEnv
 import gin.tf
 
 
@@ -52,9 +51,7 @@ def load_gin_configs(gin_files, gin_bindings):
                                       skip_unknown=False)
 
 
-def create_fetch_cam_environment():
-  env = FetchDiscreteCamSiamenseEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
-  return env
+
 
 '''
 def create_atari_environment(game_name, sticky_actions=True):
@@ -114,7 +111,7 @@ class Runner(object):
   def __init__(self,
                base_dir,
                create_agent_fn,
-               create_environment_fn=create_fetch_cam_environment,
+               create_environment_fn=None,
                game_name=None,
                checkpoint_file_prefix='ckpt',
                logging_file_prefix='log',
