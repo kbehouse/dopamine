@@ -25,6 +25,7 @@ python -um dopamine.fetch_cam_train.train_siamese \
 ```
 
 
+## hsv 
 ```
 python -um dopamine.fetch_cam_train.train_siamese \
   --agent_name=rainbow \
@@ -32,6 +33,15 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin' \
   --hsv=True
 ```
+```
+python -um dopamine.fetch_cam_train.train_siamese \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_siamese_128_hsv \
+  --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin' \
+  --hsv=True
+```
+
+
 ### Acknowledgement
 
 If you use Dopamine in your work, we ask that you cite this repository as a
