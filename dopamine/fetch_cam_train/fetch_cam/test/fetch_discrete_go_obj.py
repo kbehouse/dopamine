@@ -151,12 +151,12 @@ def go_obj_savepic(is_render = True):
 
 
 
-def go_obj_savepic_with_camenv(is_render = True):
+def go_obj_savepic_with_camenv(is_render = True, gray_img = False):
     save_dir = 'z_fetch_run_pic'
     create_dir(save_dir)
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=gray_img)
     # obs = env.reset()
     # done = False
 
@@ -199,10 +199,12 @@ def go_obj_savepic_with_camenv(is_render = True):
             
             # print('s shape = ', np.shape(s))
             # gray image
-            # cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s[:,:,0])
-            
-            rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
-            cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+
+            if gray_img:
+                cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s[:,:,0])
+            else:
+                rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
+                cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
             
             # img = Image.fromarray(s[:,:,0], 'RGB')
             # # img.save(save_dir + '/%03d.jpg' % step_count)
@@ -221,7 +223,7 @@ def go_obj_savepic_with_camenv(is_render = True):
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
-def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_obj = False, noise = False):
+def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = False, noise = False):
     if os.path.exists('tmp/'):
         shutil.rmtree('tmp/') 
     # dis_tolerance  = 0.0001     # 1mm
@@ -263,7 +265,7 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_obj = False
         
         
         sum_r = 0
-        target_obj_id = 0 if rand_obj==False else np.random.randint(3)
+        target_obj_id = 0 if rand_pick_obj==False else np.random.randint(3)
         print('Target object -> object%d' % target_obj_id)
         noise_x = 0.00 if noise else 0.0
         noise_y = 0.04 if noise else 0.0
@@ -337,6 +339,6 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_obj = False
 # go_obj_savepic()
 # go_obj()
 
-# go_obj_savepic_with_camenv()
+go_obj_savepic_with_camenv(gray_img=True)
 # go_obj_savepic_siamese()
-go_obj_savepic_siamese(hsv_color=True, rand_obj=True, noise=False)
+# go_obj_savepic_siamese(hsv_color=True, rand_pick_obj=True, noise=False)

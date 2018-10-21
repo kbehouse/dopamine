@@ -499,11 +499,14 @@ class DQNAgent(object):
     Returns:
       bool, True if unbundling was successful.
     """
+    print('-------unbundle-----')
+    print(f'checkpoint_dir = {checkpoint_dir}, iteration_number={iteration_number}')#, bundle_dictionary={bundle_dictionary}')
     try:
       # self._replay.load() will throw a NotFoundError if it does not find all
       # the necessary files, in which case we abort the process & return False.
       self._replay.load(checkpoint_dir, iteration_number)
-    except tf.errors.NotFoundError:
+    except tf.errors.NotFoundError as e :
+      print('[E] in tf.errors.NotFoundError!!!!, e -> ', e )
       return False
     for key in self.__dict__:
       if key in bundle_dictionary:

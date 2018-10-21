@@ -207,12 +207,18 @@ class FetchEnv(robot_env.RobotEnv):
             # print(obj_pos_ary)
             for i in range(len(obj_pos_ary)):
                 obj_joint_name = 'object%d:joint' % i
-                object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
-                assert object_qpos.shape == (7,)
-                object_qpos[:2] = obj_pos_ary[i]
-                object_qpos[2] = obj_z if i>=1 else  object_qpos[2]
-                    
-                self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+                try:
+                    object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
+                    assert object_qpos.shape == (7,)
+                    object_qpos[:2] = obj_pos_ary[i]
+                    object_qpos[2] = obj_z if i>=1 else  object_qpos[2]
+                        
+                    self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+                except Exception as e :
+                    # print('e -> ', e )
+                    # continue
+                    pass 
+
         
         self.sim.forward()
         self.gripper_to_init()

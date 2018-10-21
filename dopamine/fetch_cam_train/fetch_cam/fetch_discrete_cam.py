@@ -52,6 +52,7 @@ class FetchDiscreteCamEnv:
 
     def reset(self):
         self.env.reset()
+        # self.env.hide_obj1_obj2()
         self.env.render()
         rgb_external = self.env.sim.render(width=256, height=256, camera_name="external_camera_0", depth=False,
                     mode='offscreen', device_id=-1)

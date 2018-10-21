@@ -23,7 +23,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             'object0:joint': [1.25, 0.53, 0.4, 1., 0., 0., 0.],
         }
         fetch_env.FetchEnv.__init__(
-            self, 'fetch/pick_and_place.xml', has_object=True, block_gripper=False, n_substeps=20,
+            self, 'fetch/pick_and_place_1obj.xml', has_object=True, block_gripper=False, n_substeps=20,
             gripper_extra_height=0.2, target_in_the_air=True, target_offset=0.0,
             obj_range=0.15, target_range=0.15, distance_threshold=0.05,
             initial_qpos=initial_qpos, reward_type=reward_type)
@@ -209,6 +209,27 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         obj_hide_z = obj_z - 0.15
 
         # print('obj0 z ', obj_z)
+        for i in range(1,3):
+            obj_joint_name = 'object%d:joint' % i
+            # print("modify ", obj_joint_name)
+            object_qpos = self.sim.data.get_joint_qpos(obj_joint_name)
+            assert object_qpos.shape == (7,)
+            object_qpos[2] = obj_hide_z
+
+            self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+
+        self.sim.forward()
+        self._step_callback()
+
+        # self.render()
+        # self.gripper_to_init()
+
+    def hide_obj1_obj2(self):
+       
+        # hide obj1, obj2
+        obj_z =  self.obj_pos[2]
+        obj_hide_z = obj_z - 0.15
+
         for i in range(1,3):
             obj_joint_name = 'object%d:joint' % i
             # print("modify ", obj_joint_name)

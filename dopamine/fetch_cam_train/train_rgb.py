@@ -105,6 +105,7 @@ def create_runner(base_dir, create_agent_fn):
   assert base_dir is not None
   # Continuously runs training and evaluation until max num_iterations is hit.
   if FLAGS.schedule == 'continuous_train_and_eval':
+    print('in continuous trani and eval')
     return run_experiment_rgb.Runner(base_dir, create_agent_fn)
   # Continuously runs training until max num_iterations is hit.
   elif FLAGS.schedule == 'continuous_train':
