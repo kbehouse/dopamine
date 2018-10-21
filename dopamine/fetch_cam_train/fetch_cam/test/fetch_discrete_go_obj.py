@@ -221,7 +221,7 @@ def go_obj_savepic_with_camenv(is_render = True):
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
-def go_obj_savepic_siamese(is_render = True, hsv_color = False):
+def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_obj = False, noise = False):
     if os.path.exists('tmp/'):
         shutil.rmtree('tmp/') 
     # dis_tolerance  = 0.0001     # 1mm
@@ -261,12 +261,22 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False):
             rgb_img_target = cv2.cvtColor(obs[1] , cv2.COLOR_BGR2RGB) 
             cv2.imwrite(save_dir + '/target.jpg', rgb_img_target)
         
+        
         sum_r = 0
+        target_obj_id = 0 if rand_obj==False else np.random.randint(3)
+        print('Target object -> object%d' % target_obj_id)
+        noise_x = 0.00 if noise else 0.0
+        noise_y = 0.04 if noise else 0.0
+
+        target_pos_x = env.get_obj_pos(target_obj_id)[0] + noise_x
+        target_pos_y = env.get_obj_pos(target_obj_id)[1] + noise_y
+        
         while True:
             if is_render:
                 env.render()
-            diff_x = env.obj_pos[0] - env.pos[0]
-            diff_y = env.obj_pos[1] - env.pos[1]
+            
+            diff_x = target_pos_x - env.pos[0]
+            diff_y = target_pos_y - env.pos[1]
             if diff_x > step_ds:
                 a = 0 # [1, 0, 0, 0, 0]
             elif diff_x < 0 and abs(diff_x) >  step_ds:
@@ -329,4 +339,4 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False):
 
 # go_obj_savepic_with_camenv()
 # go_obj_savepic_siamese()
-go_obj_savepic_siamese(hsv_color=True)
+go_obj_savepic_siamese(hsv_color=True, rand_obj=True, noise=False)

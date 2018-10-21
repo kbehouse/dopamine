@@ -42,6 +42,10 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     def obj_pos(self):
         return self.sim.data.get_site_xpos('object0')
 
+    def get_obj_pos(self, obj_id ):
+        obj_name  = 'object%d' % obj_id
+        return self.sim.data.get_site_xpos(obj_name)
+
     @property
     def gripper_state(self):
         robot_qpos, robot_qvel = robot_get_obs(self.sim)
@@ -127,7 +131,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         
         if action[4]==1:
             
-            object_pos = self.sim.data.get_site_xpos('object0')
+            object_pos = self.sim.data.get_site_xpos('object0').copy()
             dz = object_pos[2] - self.pos[2]
             self.go_diff_pos([0, 0, dz])
             # print('DOWN object_pos = ', object_pos,'self.pos = ', self.pos, ',dz = ', dz)
@@ -137,8 +141,8 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             
             # up
             self.go_diff_pos([0, 0, -dz], gripper_state = -1)
-
-            if self.gripper_state[0] > 0.01:
+            new_object_pos = self.sim.data.get_site_xpos('object0')
+            if self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm
                 reward = 1
             else:
                 reward = -1

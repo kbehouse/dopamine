@@ -6,8 +6,9 @@ import time
 import tensorflow as tf
 # because thread bloack the image catch (maybe), so create the shell class 
 from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
+from matplotlib import pyplot as plt
 
-IMG_W_H = 128
+IMG_W_H = 84
 class FetchDiscreteCamSiamenseEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, hsv_color = False, is_render=False):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, is_render = is_render)
@@ -15,6 +16,7 @@ class FetchDiscreteCamSiamenseEnv:
 
         self.target_pic = None
         self.hsv_color = hsv_color
+        self.is_render = is_render
 
     def img_preprocess(self, img):
         # not support gray image
@@ -41,6 +43,13 @@ class FetchDiscreteCamSiamenseEnv:
         rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
             mode='offscreen', device_id=-1)
 
+        if self.is_render:
+            self.render_gripper_img(rgb_gripper)
+            # rgb_img = cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
+            # cv2.imshow('Gripper Image',rgb_img)
+            # cv2.waitKey(50)
+            
+
         s = [self.img_preprocess(rgb_gripper), self.target_pic]
         return s, r, d, None
 
@@ -52,6 +61,9 @@ class FetchDiscreteCamSiamenseEnv:
     @property
     def obj_pos(self):
         return self.env.obj_pos
+
+    def get_obj_pos(self, obj_id):
+        return self.env.get_obj_pos(obj_id)
 
     @property
     def gripper_state(self):
@@ -68,6 +80,14 @@ class FetchDiscreteCamSiamenseEnv:
                         mode='offscreen', device_id=-1)
             rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
                 mode='offscreen', device_id=-1)
+
+            if self.is_render :
+                self.render_target_img(rgb_gripper)
+                self.render_gripper_img(rgb_gripper)
+                
+                time.sleep(2)
+
+            # time.sleep(2)
             # resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
             # self.target_pic = resize_img.copy()
             self.target_pic =  self.img_preprocess(rgb_gripper)
@@ -97,10 +117,34 @@ class FetchDiscreteCamSiamenseEnv:
         rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
             mode='offscreen', device_id=-1)
     
+        if self.is_render :
+            self.render_gripper_img(rgb_gripper)
+            time.sleep(1)
+
+
         s = [self.img_preprocess(rgb_gripper), self.target_pic]
         return s
         
 
     def render(self):
         self.env.render()
+
+    def render_target_img(self, img):
+        # if self.is_render:
+        rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.imshow('Target Image',rgb_img)
+        cv2.waitKey(50)
+
+    def render_gripper_img(self, gripper_img):
+        # if self.is_render:
+        rgb_img = cv2.cvtColor(gripper_img, cv2.COLOR_BGR2RGB)
+        cv2.imshow('Gripper Image',rgb_img)
+        cv2.waitKey(50)
+
+
+        # plt.figure(1)
+        # plt.imshow(rgb_gripper)
+        # plt.show(block=False)
+        # plt.pause(0.001)
+        # time.sleep(2)
 

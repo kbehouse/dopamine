@@ -20,7 +20,7 @@ from dopamine.replay_memory import circular_replay_buffer
 slim = tf.contrib.slim
 
 
-STATE_W_H = 128
+STATE_W_H = 84
 dqn_agent.OBSERVATION_SHAPE = (2, STATE_W_H, STATE_W_H, 3) 
 dqn_agent.STACK_SIZE = 4
 

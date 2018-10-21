@@ -41,6 +41,14 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --hsv=True
 ```
 
+## run render
+```
+python -um dopamine.fetch_cam_train.train_siamese_render \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/_collection_fetch_cam_rainbow_siamese/fetch_cam_rainbow_siamese_84_hsv \
+  --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin' \
+  --hsv=True
+```
 
 ### Acknowledgement
 
