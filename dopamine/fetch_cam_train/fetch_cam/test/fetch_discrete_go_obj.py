@@ -339,6 +339,6 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = 
 # go_obj_savepic()
 # go_obj()
 
-go_obj_savepic_with_camenv(gray_img=True)
+go_obj_savepic_with_camenv(gray_img=False)
 # go_obj_savepic_siamese()
 # go_obj_savepic_siamese(hsv_color=True, rand_pick_obj=True, noise=False)

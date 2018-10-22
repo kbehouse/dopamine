@@ -23,7 +23,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             'object0:joint': [1.25, 0.53, 0.4, 1., 0., 0., 0.],
         }
         fetch_env.FetchEnv.__init__(
-            self, 'fetch/pick_and_place_1obj.xml', has_object=True, block_gripper=False, n_substeps=20,
+            self, 'fetch/pick_and_place.xml', has_object=True, block_gripper=False, n_substeps=20,
             gripper_extra_height=0.2, target_in_the_air=True, target_offset=0.0,
             obj_range=0.15, target_range=0.15, distance_threshold=0.05,
             initial_qpos=initial_qpos, reward_type=reward_type)
@@ -245,18 +245,47 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         # self.render()
         # self.gripper_to_init()
 
-    def rand_objs_color(self):
-        for i in range(3):
+    # def rand_objs_color(self):
+    #     for i in range(3):
+    #         obj_name = 'object%d' % i
+    #         # it will fail in first time
+    #         try:
+    #             modder = TextureModder(self.sim)
+    #             # color = np.array([0, 0,255 ]
+    #             color = np.array(np.random.uniform(size=3) * 255, dtype=np.uint8) 
+    #             modder.set_rgb(obj_name, color )
+
+                
+    #         except Exception as e :
+    #             pass
+    #             # print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
+
+    #     self.sim.forward()
+
+    def set_obj_color(self, geom_name, rgba):
+        geom_id = self.sim.model.geom_name2id(geom_name)
+        mat_id = self.sim.model.geom_matid[geom_id]
+        # print('mat_id = ', mat_id)
+        # print('self.model.mat_rgba = ' , self.sim.model.mat_rgba)
+        # self.model.mat_rgba[mat_id, :] = 1.0
+        self.sim.model.mat_rgba[mat_id] = rgba # [0., 1., 0.,1.]
+
+
+
+    def rand_objs_color(self, exclude_obj0 = False):
+        start_obj = 0 if exclude_obj0==False else 1
+        for i in range(start_obj, 3):
             obj_name = 'object%d' % i
             # it will fail in first time
             try:
-                modder = TextureModder(self.sim)
-                # color = np.array([0, 0,255 ]
-                color = np.array(np.random.uniform(size=3) * 255, dtype=np.uint8) 
-                modder.set_rgb(obj_name, color )
+                color =  np.random.rand(4)
+                color[3] = 1.0
+                # print('!!color = ', color) 
+                self.set_obj_color(obj_name, color)
+
             except Exception as e :
-                pass
-                # print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
+                # pass
+                print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
 
         self.sim.forward()
 
@@ -279,12 +308,18 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             hsv_3 = random.sample(self.color_space, 3)
 
             for i in range(3):
+                obj_name = 'object%d' % i
+                '''
                 rgb = hsv_to_rgb( hsv_3[i] )* 255.0
                 rgb = rgb.astype(int)
                 # print('hsv = ', hsv_3[i], ', rgb=', rgb)
-                obj_name = 'object%d' % i
+                
                 modder = TextureModder(self.sim)
                 modder.set_rgb(obj_name, rgb )
+                '''
+                rgb = hsv_to_rgb( hsv_3[i] )
+                rgba = [rgb[0], rgb[1], rgb[2], 1.0]
+                self.set_obj_color(obj_name, rgba)
         except Exception as e :
             # pass
             print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
