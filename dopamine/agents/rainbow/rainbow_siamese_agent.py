@@ -129,8 +129,8 @@ class RainbowSiameseAgent(RainbowAgent):
     # first_state  = tf.expand_dims(first_state, 0)
     # second_state = state[1]
     # second_state = tf.expand_dims(second_state, 0)
-    first_state  = state[:,0,:,:]
-    second_state = state[:,1,:,:]
+    first_state  = state[:,0,:,:,:]
+    second_state = state[:,1,:,:,:3]
     print('state shape = ', state.shape)
     print('first_state shape = ', first_state.shape)
     print('second_state shape = ', second_state.shape)
@@ -144,15 +144,11 @@ class RainbowSiameseAgent(RainbowAgent):
     #     first_net = tf.image.rgb_to_hsv(first_net_rgb_float)  
     # else: # rgb color
     #     first_net = tf.div(first_net, 255.)
-    first_net = slim.conv2d(
-        first_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
-    first_net = slim.conv2d(
-        first_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
-    first_net = slim.conv2d(
-        first_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+    first_net = slim.conv2d(first_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
+    first_net = slim.conv2d(first_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
+    first_net = slim.conv2d(first_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
     first_net = slim.flatten(first_net)
-    first_net = slim.fully_connected(
-        first_net, 512, weights_initializer=weights_initializer)
+    first_net = slim.fully_connected(first_net, 1024, weights_initializer=weights_initializer)
 
     # second network
     second_net = tf.cast(second_state, tf.float32)
@@ -163,24 +159,20 @@ class RainbowSiameseAgent(RainbowAgent):
     #     second_net = tf.image.rgb_to_hsv(second_net_rgb_float)  
     # else: # rgb color
     #     second_net = tf.div(second_net, 255.)
-    second_net = slim.conv2d(
-        second_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
-    second_net = slim.conv2d(
-        second_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
-    second_net = slim.conv2d(
-        second_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+    second_net = slim.conv2d(second_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
+    second_net = slim.conv2d(second_net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
+    second_net = slim.conv2d(second_net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
     second_net = slim.flatten(second_net)
-    second_net = slim.fully_connected(
-        second_net, 512, weights_initializer=weights_initializer)
+    second_net = slim.fully_connected(second_net, 1024, weights_initializer=weights_initializer)
 
-    net = tf.concat([first_net, second_net], axis=1)
-
+    # net = tf.concat([first_net, second_net], axis=1)
+    net = tf.subtract(first_net, second_net)
     print('first_net', first_net)
     print('second_net', second_net)
     print('net', net)
 
-    net = slim.fully_connected(
-        net, 512, weights_initializer=weights_initializer)
+    net = slim.fully_connected(net, 512, weights_initializer=weights_initializer)
+    net = slim.fully_connected(net, 256, weights_initializer=weights_initializer)
 
     print('net', net)
 
