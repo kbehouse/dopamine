@@ -151,13 +151,13 @@ def go_obj_savepic(is_render = True):
 
 
 
-def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False):
+def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False, only_show_obj0 = False):
     if os.path.exists('tmp/'):
         shutil.rmtree('tmp/') 
     
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=gray_img, is_render=is_render)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=gray_img, is_render=is_render, only_show_obj0 = only_show_obj0)
     # obs = env.reset()
     # done = False
 
@@ -348,6 +348,6 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = 
 # go_obj()
 
 # go_obj_savepic_with_camenv(gray_img=False)
-go_obj_savepic_with_camenv(gray_img=True, noise=False, is_render=True)
+go_obj_savepic_with_camenv(gray_img=True, noise=False, is_render=True, only_show_obj0 = True)
 # go_obj_savepic_siamese()
 # go_obj_savepic_siamese(hsv_color=True, rand_pick_obj=True, noise=False)
