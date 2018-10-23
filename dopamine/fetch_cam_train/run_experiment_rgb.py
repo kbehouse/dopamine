@@ -52,7 +52,7 @@ def load_gin_configs(gin_files, gin_bindings):
 
 
 def create_fetch_cam_environment():
-  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False)
+  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False, is_render = False)
   return env
 
 '''
@@ -164,7 +164,7 @@ class Runner(object):
     self._environment = create_environment_fn()
     # Set up a session and initialize variables.
     config = tf.ConfigProto(allow_soft_placement=True)
-    config.gpu_options.per_process_gpu_memory_fraction = 0.3
+    config.gpu_options.per_process_gpu_memory_fraction = 0.2
     self._sess = tf.Session('',
                             config=config) #tf.ConfigProto(allow_soft_placement=True))
     self._agent = create_agent_fn(self._sess, self._environment,

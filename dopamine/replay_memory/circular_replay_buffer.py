@@ -358,7 +358,7 @@ class OutOfGraphReplayBuffer(object):
       # print('state shape = ',np.shape(state))
       # print('tmp_state shape = ',np.shape(tmp_state), ' state[i, :, :, :, :] shape = ', np.shape(state[i, :, :, :, :])) 
       return tmp_state
-    elif len(self._state_shape) ==3:
+    elif len(self._state_shape) ==3 and self._state_shape[2] > self._stack_size:
       # print('get_observation_stack() in len(self._state_shape) ==3, state shape = ',np.shape(state))
       #  self._observation_shape->(128,128,3) , self._state_shape ->(128,128,12) , state shape-> (4, 128, 128, 3), tmp_state shape-> (128, 128, 12)
       tmp_state = np.zeros(self._state_shape)
@@ -656,17 +656,26 @@ class OutOfGraphReplayBuffer(object):
       NotFoundError: If not all expected files are found in directory.
     """
     save_elements = self._return_checkpointable_elements()
+    # print('save_elements = ', save_elements)
     # We will first make sure we have all the necessary files available to avoid
     # loading a partially-specified (i.e. corrupted) replay buffer.
     for attr in save_elements:
+      print('save_elements attr = ', attr)
       filename = self._generate_filename(checkpoint_dir, attr, suffix)
       if not tf.gfile.Exists(filename):
-        raise tf.errors.NotFoundError(None, None,
+        if attr == 'two_image_observation':
+          print('[I] circular_replay_buffer.py Load() -> ignore two_image_observation attr')
+        else:
+          raise tf.errors.NotFoundError(None, None,
                                       'Missing file: {}'.format(filename))
     # If we've reached this point then we have verified that all expected files
     # are available.
     for attr in save_elements:
       filename = self._generate_filename(checkpoint_dir, attr, suffix)
+      if not tf.gfile.Exists(filename):
+        if attr == 'two_image_observation':
+          print('[I] circular_replay_buffer.py Load() -> ignore two_image_observation attr again')
+          continue
       with tf.gfile.Open(filename, 'rb') as f:
         with gzip.GzipFile(fileobj=f) as infile:
           if attr.startswith(STORE_FILENAME_PREFIX):
