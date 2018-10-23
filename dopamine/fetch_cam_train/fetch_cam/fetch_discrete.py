@@ -142,8 +142,18 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             # up
             self.go_diff_pos([0, 0, -dz], gripper_state = -1)
             new_object_pos = self.sim.data.get_site_xpos('object0')
-            if self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm
+            if self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
                 reward = 1
+                ori_xy = object_pos[:2]
+                new_xy = new_object_pos[:2]
+                
+                diff_xy = np.linalg.norm(new_xy -ori_xy)    
+                diff_xy = diff_xy / 0.01  # to cm
+
+                # print('diff_xy = ', diff_xy)
+
+                reward-= diff_xy * 0.1
+
             else:
                 reward = -1
             
