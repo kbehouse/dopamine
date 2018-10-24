@@ -22,7 +22,7 @@ class FetchDiscreteCamEnv:
 
     def step(self,action):
         # print('i action = ', action)
-        a_one_hot = np.zeros(5)
+        a_one_hot = np.zeros(6)
         a_one_hot[action] = 1
         s, r, d, _ = self.env.step(a_one_hot)
 
@@ -58,6 +58,10 @@ class FetchDiscreteCamEnv:
     @property
     def obj_pos(self):
         return self.env.obj_pos
+
+    @property
+    def red_tray_pos(self):
+        return self.env.red_tray_pos
 
     @property
     def gripper_state(self):

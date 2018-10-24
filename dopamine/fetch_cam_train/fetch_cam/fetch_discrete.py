@@ -23,7 +23,8 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             'object0:joint': [1.25, 0.53, 0.4, 1., 0., 0., 0.],
         }
         fetch_env.FetchEnv.__init__(
-            self, 'fetch/pick_and_place.xml', has_object=True, block_gripper=False, n_substeps=20,
+            # self, 'fetch/pick_and_place.xml', has_object=True, block_gripper=False, n_substeps=20,
+            self, 'fetch/pick_and_place_tray.xml', has_object=True, block_gripper=False, n_substeps=20,
             gripper_extra_height=0.2, target_in_the_air=True, target_offset=0.0,
             obj_range=0.15, target_range=0.15, distance_threshold=0.05,
             initial_qpos=initial_qpos, reward_type=reward_type)
@@ -33,6 +34,8 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         self.ds = step_ds     # each step run distance, [1,0,0,0] run dx = 0.01
         self.is_render = is_render
 
+        self.hold_gripper = False
+
     @property
     def pos(self):
         grip_pos = self.sim.data.get_site_xpos('robot0:grip')
@@ -41,6 +44,11 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     @property
     def obj_pos(self):
         return self.sim.data.get_site_xpos('object0')
+
+    @property
+    def red_tray_pos(self):
+        # return self.sim.data.get_site_xpos('red_tray')
+        return self.sim.data.get_body_xpos('red_tray')
 
     def get_obj_pos(self, obj_id ):
         obj_name  = 'object%d' % obj_id
@@ -123,27 +131,39 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
 
         return r
         
-    # override robot_env:step()
-    def step(self, action):
-        reward = 0
-        self.use_step += 1
-        done = True  if self.use_step >= 100 else False
-        
-        if action[4]==1:
-            
-            object_pos = self.sim.data.get_site_xpos('object0').copy()
-            dz = object_pos[2] - self.pos[2]
-            self.go_diff_pos([0, 0, dz])
-            # print('DOWN object_pos = ', object_pos,'self.pos = ', self.pos, ',dz = ', dz)
 
-            final_gripper_state = self.gripper_close()
-            # print("final final_gripper_state = ", final_gripper_state)
-            
-            # up
-            self.go_diff_pos([0, 0, -dz], gripper_state = -1)
-            new_object_pos = self.sim.data.get_site_xpos('object0')
-            if self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
-                reward = 1
+
+    def pick_place(self, pick = True):
+        object_pos = self.sim.data.get_site_xpos('object0').copy()
+
+        if pick:
+            dz = object_pos[2] - self.pos[2]
+        else:
+            dz = self.red_tray_pos[2] - self.pos[2] + 0.02
+
+
+        down_gripper_state = 1 if pick else -1
+        self.go_diff_pos([0, 0, dz], down_gripper_state)
+        # print('DOWN object_pos = ', object_pos,'self.pos = ', self.pos, ',dz = ', dz)
+
+        
+        final_gripper_state = self.gripper_close(pick)
+        # print("final final_gripper_state = ", final_gripper_state)
+        
+        # for i in range(1, 10):
+        #     self.sim.step()
+        #     self._step_callback()
+        #     self.render()  
+
+        # up
+        up_gripper_state = -1 if pick else 1
+        self.go_diff_pos([0, 0, -dz], gripper_state = up_gripper_state)
+        new_object_pos = self.sim.data.get_site_xpos('object0')
+        
+        
+        if pick:
+            if  self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
+                reward = 0.5
                 ori_xy = object_pos[:2]
                 new_xy = new_object_pos[:2]
                 
@@ -152,36 +172,58 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
 
                 # print('diff_xy = ', diff_xy)
 
-                reward-= diff_xy * 0.1
+                reward-= diff_xy * 0.01
 
             else:
                 reward = -1
-            
-            done = True
+        else:
+            diff_tray_xy = np.linalg.norm( new_object_pos[:2] - self.red_tray_pos[:2]) 
+            print('diff_tray_xy = ', diff_tray_xy)   
+            if diff_tray_xy < 0.04:
+                reward = 1
+            else:
+                reward = -1
+        
 
-            if self.is_render:
-                if final_gripper_state[0] > 0.01:
-                    grip_close_reward = 1
-                else:
-                    grip_close_reward = -1
-                diff_reward = 'DIFF' if grip_close_reward!=reward else 'SAME' 
-                print(f'grip_close_reward = {grip_close_reward}, reward={reward}, {diff_reward}')
-                import time
-                for i in range(1, 10):
-                    # print('in render 0.01, i = ', i)
-                    # time.sleep(0.01)
-                    # self.gripper_close()
-                    self.sim.step()
-                    self._step_callback()
-                    self.render()    
+        if self.is_render:
+            if final_gripper_state[0] > 0.01:
+                grip_close_reward = 1
+            else:
+                grip_close_reward = -1
+            diff_reward = 'DIFF' if grip_close_reward!=reward else 'SAME' 
+            print(f'grip_close_reward = {grip_close_reward}, reward={reward}, {diff_reward}')
+            import time
+            for i in range(1, 10):
+                # print('in render 0.01, i = ', i)
+                # time.sleep(0.01)
+                # self.gripper_close()
+                self.sim.step()
+                self._step_callback()
+                self.render()  
+        return reward
+    # override robot_env:step()
+    def step(self, action):
+        reward = 0.0
+        self.use_step += 1
+        done = True  if self.use_step >= 150 else False
+        
+        if action[4]==1:
+            reward = self.pick_place(True)
+            self.hold_gripper = True
+            if reward == -1:
+                done = True
+        elif action[5]==1:
+            reward = self.pick_place(False)
+            done = True
         else:
             
             dx = action[0] *  self.ds - action[2] * self.ds
             dy = action[1] *  self.ds - action[3] * self.ds
             dz = 0
             # print('run dx=%0.2f, dy=%0.2f, dz=%0.2f' % (dx, dy, dz))
-            
-            go_diff_reulst = self.go_diff_pos([dx, dy, dz])
+            hold = -1 if self.hold_gripper else 1
+            go_diff_reulst = self.go_diff_pos([dx, dy, dz], hold)
+            # print('go_diff_reulst = ', go_diff_reulst)
             if not go_diff_reulst:
                 done = True
                 reward = -1
