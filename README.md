@@ -69,6 +69,16 @@ python -um dopamine.fetch_cam_train.train_siamese_render \
   --hsv=True
 ```
 
+
+# run pick and place
+```
+
+python -um dopamine.fetch_cam_train.train_rgb \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_pick_place_test \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+```
+
 ### Acknowledgement
 
 If you use Dopamine in your work, we ask that you cite this repository as a

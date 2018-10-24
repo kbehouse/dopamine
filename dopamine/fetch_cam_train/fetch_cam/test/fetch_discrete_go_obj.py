@@ -82,7 +82,7 @@ def go_obj_savepic(is_render = True):
 
     # ori_pos = (obs['eeinfo'][0]).copy()
     print('---ori_pos = ' , env.pos,'----')
-    render# step  = 0
+    # step  = 0
     # robot_step = 0
     # # env.render()
     s_time = time.time()
