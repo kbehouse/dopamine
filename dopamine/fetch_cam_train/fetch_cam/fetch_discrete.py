@@ -139,7 +139,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         if pick:
             dz = object_pos[2] - self.pos[2]
         else:
-            dz = self.red_tray_pos[2] - self.pos[2] + 0.02
+            dz = self.red_tray_pos[2] - self.pos[2] + 0.01
 
 
         down_gripper_state = 1 if pick else -1
@@ -177,9 +177,10 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             else:
                 reward = -1
         else:
-            diff_tray_xy = np.linalg.norm( new_object_pos[:2] - self.red_tray_pos[:2]) 
-            print('diff_tray_xy = ', diff_tray_xy)   
-            if diff_tray_xy < 0.04:
+            # diff_tray_xy = np.linalg.norm( new_object_pos[:2] - self.red_tray_pos[:2]) 
+            diff_tray_xy = np.linalg.norm( self.pos[:2] - self.red_tray_pos[:2]) 
+            # print('diff_tray_xy = ', diff_tray_xy)   
+            if diff_tray_xy < 0.03:
                 reward = 1
             else:
                 reward = -1
@@ -214,6 +215,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 done = True
         elif action[5]==1:
             reward = self.pick_place(False)
+            self.hold_gripper = False
             done = True
         else:
             
@@ -228,7 +230,8 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 done = True
                 reward = -1
             else:
-                reward = self.measure_obj_reward() # 0
+                if not self.hold_gripper:
+                    reward = self.measure_obj_reward() # 0
             
 
 

@@ -84,6 +84,8 @@ class PickRobot:
         # close gripper and up
         a = 4 # [0, 0, 0, 0, 1]
         s,r, d, info =  self.env.step(a)
+        # print('r = {}, sum_r={}'.format(r, self.sum_r))
+            
         self.sum_r += r
         # ----place object----
         target_pos_x = self.env.red_tray_pos[0] + noise_x
@@ -93,7 +95,11 @@ class PickRobot:
         # open gripper and up
         a = 5 # [0, 0, 0, 0, 1]
         s,r, d, info =  self.env.step(a)
+        # print('r = {}, sum_r={}'.format(r, self.sum_r))
+            
         self.sum_r += r  
+        if self.sum_r <=0:
+            print("!!!!!!!!!!!!!!!!!!!!!! strange")
         print('sum_r = ', self.sum_r)
         print("use step = ", self.step_count)
 
@@ -105,7 +111,7 @@ class PickRobot:
 if os.path.exists('tmp/'):
     shutil.rmtree('tmp/') 
 
-pickbot = PickRobot(is_render = True)
+pickbot = PickRobot(is_render = False)
 
 for _ in range(10):
     pickbot.reset()
