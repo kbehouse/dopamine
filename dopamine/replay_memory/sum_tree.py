@@ -79,6 +79,7 @@ class SumTree(object):
     self.nodes = []
     tree_depth = int(math.ceil(np.log2(capacity)))
     level_size = 1
+    print('-----------tree_depth =', tree_depth,'------------')
     for _ in range(tree_depth + 1):
       nodes_at_this_depth = np.zeros(level_size)
       self.nodes.append(nodes_at_this_depth)
@@ -86,6 +87,12 @@ class SumTree(object):
       level_size *= 2
 
     self.max_recorded_priority = 1.0
+
+
+    # print('self._total_priority() = ', self._total_priority())
+    # print('self.nodes = ',self.nodes)
+    # print('self.max_recorded_priority = ',self.max_recorded_priority)
+    
 
   def _total_priority(self):
     """Returns the sum of all priorities stored in this sum tree.
@@ -155,6 +162,7 @@ class SumTree(object):
     Raises:
       Exception: If the sum tree is empty (i.e. its node values sum to 0).
     """
+    # print('self._total_priority() = ', self._total_priority())
     if self._total_priority() == 0.0:
       raise Exception('Cannot sample from an empty sum tree.')
 

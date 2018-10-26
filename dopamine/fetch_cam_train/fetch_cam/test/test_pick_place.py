@@ -49,7 +49,8 @@ class PickRobot:
             self.step_count +=1
             s,r, d, info =  self.env.step(a)
             self.sum_r += r  
-            # print('r = {}, sum_r={}'.format(r, self.sum_r))
+            print('r = {}, sum_r={}'.format(r, self.sum_r))
+            # print('gripper_state = ', self.env.gripper_state, ',is_gripper_close=', self.env.is_gripper_close)
             
             rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
             cv2.imwrite(self.save_dir + '/%03d.jpg' % self.step_count, rgb_img)
@@ -77,6 +78,7 @@ class PickRobot:
         noise_y = 0.04 if noise else 0.0
 
         # ----pick object----
+        print('-------before pick--------------')
         target_pos_x = self.env.obj_pos[0] + noise_x
         target_pos_y = self.env.obj_pos[1] + noise_y
         self.go_target_pos(target_pos_x, target_pos_y)
@@ -86,6 +88,7 @@ class PickRobot:
         s,r, d, info =  self.env.step(a)
         # print('r = {}, sum_r={}'.format(r, self.sum_r))
             
+        print('-------after pick--------------')
         self.sum_r += r
         # ----place object----
         target_pos_x = self.env.red_tray_pos[0] + noise_x

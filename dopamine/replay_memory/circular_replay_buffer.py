@@ -179,12 +179,7 @@ class OutOfGraphReplayBuffer(object):
     """
     self._store = {}
     for storage_element in self.get_storage_signature():
-      print('storage_element = ', storage_element)
       array_shape = [self._replay_capacity] + list(storage_element.shape)
-      print('array_shape = ', array_shape)
-      print('storage_element.name = ', storage_element.name)
-      print('storage_element.type = ', storage_element.type)
-      
       self._store[storage_element.name] = np.empty(
           array_shape, dtype=storage_element.type)
 
@@ -282,6 +277,7 @@ class OutOfGraphReplayBuffer(object):
     Raises:
       ValueError: If args have wrong shape or dtype.
     """
+    # print('_check_add_types say len(args)= ', len(args))
     if len(args) != len(self.get_add_args_signature()):
       raise ValueError('Add expects {} elements, received {}'.format(
           len(self.get_add_args_signature()), len(args)))
@@ -515,8 +511,11 @@ class OutOfGraphReplayBuffer(object):
     transition_elements = self.get_transition_elements(batch_size)
     batch_arrays = self._create_batch_arrays(batch_size)
     for batch_element, state_index in enumerate(indices):
+      
       trajectory_indices = [(state_index + j) % self._replay_capacity
                             for j in range(self._update_horizon)]
+      # print('state_index = ', state_index)
+      # print('trajectory_indices = ', trajectory_indices, ', self._update_horizon = ', self._update_horizon)
       trajectory_terminals = self._store['terminal'][trajectory_indices]
       is_terminal_transition = trajectory_terminals.any()
       if not is_terminal_transition:
@@ -547,10 +546,15 @@ class OutOfGraphReplayBuffer(object):
           element_array[batch_element] = is_terminal_transition
         elif element.name == 'indices':
           element_array[batch_element] = state_index
+        elif element.name == 'next_gripper':
+          element_array[batch_element] =  (self._store['gripper'][next_state_index])
         elif element.name in self._store.keys():
           element_array[batch_element] = (
               self._store[element.name][state_index])
         # We assume the other elements are filled in by the subclass.
+
+
+    # print('batch_arrays = ', batch_arrays)
 
     return batch_arrays
 
@@ -573,12 +577,17 @@ class OutOfGraphReplayBuffer(object):
         ReplayElement('next_state', (batch_size,) + self._state_shape,
                       self._observation_dtype),
         ReplayElement('terminal', (batch_size,), np.uint8),
-        ReplayElement('indices', (batch_size,), np.int32)
+        ReplayElement('indices', (batch_size,), np.int32),
+        
     ]
     for element in self._extra_storage_types:
       transition_elements.append(
           ReplayElement(element.name, (batch_size,) + tuple(element.shape),
                         element.type))
+      if element.name == 'gripper':
+        transition_elements.append(ReplayElement('next_gripper', (batch_size,) + tuple(element.shape),element.type))
+    
+    # print('transition_elements -> ', transition_elements)
     return transition_elements
 
   def _generate_filename(self, checkpoint_dir, name, suffix):
@@ -739,7 +748,6 @@ class WrappedReplayBuffer(object):
       ValueError: If update_horizon is not positive.
       ValueError: If discount factor is not in [0, 1].
     """
-    print('!!!!!!!!!replay_capacity = ', replay_capacity)
     if replay_capacity < update_horizon + 1:
       raise ValueError(
           'Update horizon ({}) should be significantly smaller '
@@ -859,6 +867,15 @@ class WrappedReplayBuffer(object):
       transition_tensors: tuple of tf.Tensors.
       transition_type: tuple of ReplayElements matching transition_tensors.
     """
+    # print('transition_tensors -> ', transition_tensors)
+    # print('transition_tensors->')
+    # for d in transition_tensors:
+    #   print(d)
+    # print('transition_type->')
+    # for d in transition_type:
+    #   print(d)
+    
+    
     self.transition = collections.OrderedDict()
     for element, element_type in zip(transition_tensors, transition_type):
       self.transition[element_type.name] = element
@@ -871,6 +888,11 @@ class WrappedReplayBuffer(object):
     self.next_states = self.transition['next_state']
     self.terminals = self.transition['terminal']
     self.indices = self.transition['indices']
+
+    # print('self.transition -> ', self.transition)
+    if 'gripper' in self.transition:
+      self.gripper = self.transition['gripper']
+      self.next_gripper = self.transition['next_gripper']
 
   def save(self, checkpoint_dir, iteration_number):
     """Save the underlying replay buffer's contents in a file.

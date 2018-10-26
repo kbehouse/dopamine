@@ -34,7 +34,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         self.ds = step_ds     # each step run distance, [1,0,0,0] run dx = 0.01
         self.is_render = is_render
 
-        self.hold_gripper = False
+        self.hold_gripper_close = False
 
     @property
     def pos(self):
@@ -58,6 +58,15 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     def gripper_state(self):
         robot_qpos, robot_qvel = robot_get_obs(self.sim)
         return robot_qpos[-2:]
+
+    @property
+    def is_gripper_close(self):
+        # about grip a cube,open -> [0.05004456 0.05004454], close ->  [0.02422073 0.02435405]
+        g = self.gripper_state
+        if g[0] <= 0.045 : #and  g[1] <= 0.45:
+            return True
+        else:
+            return False
 
     def go_diff_pos(self, diff_pos, gripper_state = 1):
         # diff_pos = [dx, dy, dz]
@@ -127,6 +136,20 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         max_dis = 0.1000
         if arm_2_obj_xy  < max_dis:
             r =  (max_dis - arm_2_obj_xy ) / max_dis *0.01
+            # print('r = %.2f' % r ,'pos_xy = ', pos_xy,', obj_xy = ', obj_xy,', arm_2_obj_xy = ', arm_2_obj_xy)
+
+        return r
+
+    def measure_tray_reward(self):
+        tray_pos =  self.red_tray_pos #self.sim.data.get_site_xpos(obj_name)
+        pos_xy = self.pos[:2]
+        tray_xy = tray_pos[:2]
+        
+        arm_2_tray_xy = np.linalg.norm(pos_xy -tray_xy)
+        r = -0.001
+        max_dis = 0.1000
+        if arm_2_tray_xy  < max_dis:
+            r =  (max_dis - arm_2_tray_xy ) / max_dis *0.01
             # print('r = %.2f' % r ,'pos_xy = ', pos_xy,', obj_xy = ', obj_xy,', arm_2_obj_xy = ', arm_2_obj_xy)
 
         return r
@@ -210,12 +233,14 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         
         if action[4]==1:
             reward = self.pick_place(True)
-            self.hold_gripper = True
+            self.hold_gripper_close = True
             if reward == -1:
                 done = True
+            else:
+                reward = reward # no reward test!!
         elif action[5]==1:
             reward = self.pick_place(False)
-            self.hold_gripper = False
+            self.hold_gripper_close = False
             done = True
         else:
             
@@ -223,15 +248,17 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             dy = action[1] *  self.ds - action[3] * self.ds
             dz = 0
             # print('run dx=%0.2f, dy=%0.2f, dz=%0.2f' % (dx, dy, dz))
-            hold = -1 if self.hold_gripper else 1
+            hold = -1 if self.hold_gripper_close else 1
             go_diff_reulst = self.go_diff_pos([dx, dy, dz], hold)
             # print('go_diff_reulst = ', go_diff_reulst)
             if not go_diff_reulst:
                 done = True
                 reward = -1
             else:
-                if not self.hold_gripper:
-                    reward = self.measure_obj_reward() # 0
+                if self.hold_gripper_close:
+                    reward = self.measure_tray_reward() # 0
+                else:
+                    reward =self.measure_obj_reward() # 0
             
 
 

@@ -114,11 +114,13 @@ class OutOfGraphPrioritizedReplayBuffer(
     # Picks out 'priority' from arguments and passes the other arguments to the
     # parent method.
     for i, element in enumerate(self.get_add_args_signature()):
+      
       if element.name == 'priority':
         priority = args[i]
       else:
         parent_add_args.append(args[i])
 
+    # print('_add() self.cursor() = ', self.cursor(),', priority = ', priority)
     self.sum_tree.set(self.cursor(), priority)
 
     super(OutOfGraphPrioritizedReplayBuffer, self)._add(*parent_add_args)
@@ -136,7 +138,10 @@ class OutOfGraphPrioritizedReplayBuffer(
       Exception: If the batch was not constructed after maximum number of tries.
     """
     # Sample stratified indices. Some of them might be invalid.
+    # print('---in sample_index_batch')
+    # print('self.sum_tree = ', self.sum_tree)
     indices = self.sum_tree.stratified_sample(batch_size)
+    # print('indices ->', indices)
     allowed_attempts = self._max_sample_attempts
     for i in range(len(indices)):
       if not self.is_valid_transition(indices[i]):
@@ -192,6 +197,7 @@ class OutOfGraphPrioritizedReplayBuffer(
         [0, replay_capacity).
       priorities: float, the corresponding priorities.
     """
+    # print('---in set_priority = ', indices, ', priorities = ', priorities)
     assert indices.dtype == np.int32, ('Indices must be integers, '
                                        'given: {}'.format(indices.dtype))
     for index, priority in zip(indices, priorities):

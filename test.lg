@@ -1,68 +1,0 @@
-in fetch_cam __init__
-Choosing the latest nvidia driver: /usr/lib/nvidia-396, among ['/usr/lib/nvidia-375', '/usr/lib/nvidia-396']
-Choosing the latest nvidia driver: /usr/lib/nvidia-396, among ['/usr/lib/nvidia-375', '/usr/lib/nvidia-396']
-in continuous trani and eval
---------in RainbowRGBAgent------
-self._observation_shape=(128, 128, 3), len(self._observation_shape)=3
-storage_element =  shape_type(name='observation', shape=(128, 128, 3), type=<class 'numpy.uint8'>)
-array_shape =  [100000, 128, 128, 3]
-storage_element.name =  observation
-storage_element.type =  <class 'numpy.uint8'>
-storage_element =  shape_type(name='action', shape=(), type=<class 'numpy.int32'>)
-array_shape =  [100000]
-storage_element.name =  action
-storage_element.type =  <class 'numpy.int32'>
-storage_element =  shape_type(name='reward', shape=(), type=<class 'numpy.float32'>)
-array_shape =  [100000]
-storage_element.name =  reward
-storage_element.type =  <class 'numpy.float32'>
-storage_element =  shape_type(name='terminal', shape=(), type=<class 'numpy.uint8'>)
-array_shape =  [100000]
-storage_element.name =  terminal
-storage_element.type =  <class 'numpy.uint8'>
-!!!!!!!!!replay_capacity =  100000
-in DQN _build_networks
- self.online_convnet(self.state_ph)
- --------in RainbowRGBAgent network_template---------
-!!!!!!!1 tf.float32 , net ->  Tensor("Online/Cast:0", shape=(1, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- div 255 , net ->  Tensor("Online/div:0", shape=(1, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- conv2d 32, [8,8], stride=4 , net ->  Tensor("Online/Conv/Relu:0", shape=(1, 32, 32, 32), dtype=float32, device=/device:GPU:0)
- conv2d 64, [4, 4], stride=2 , net ->  Tensor("Online/Conv_1/Relu:0", shape=(1, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- conv2d 64, [3, 3], stride=1 , net ->  Tensor("Online/Conv_2/Relu:0", shape=(1, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- flatten , net ->  Tensor("Online/Flatten/flatten/Reshape:0", shape=(1, 16384), dtype=float32, device=/device:GPU:0)
- 512 , net ->  Tensor("Online/fully_connected/Relu:0", shape=(1, 512), dtype=float32, device=/device:GPU:0)
- fully_connected , net ->  Tensor("Online/fully_connected_1/BiasAdd:0", shape=(1, 255), dtype=float32, device=/device:GPU:0)
----before self.online_convnet(self._replay.states), self._replay.states =  Tensor("sample_replay/sample_replay/StagingArea_get:0", shape=(32, 128, 128, 12), dtype=uint8, device=/device:CPU:0)
- --------in RainbowRGBAgent network_template---------
-!!!!!!!1 tf.float32 , net ->  Tensor("Online_1/Cast:0", shape=(32, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- div 255 , net ->  Tensor("Online_1/div:0", shape=(32, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- conv2d 32, [8,8], stride=4 , net ->  Tensor("Online_1/Conv/Relu:0", shape=(32, 32, 32, 32), dtype=float32, device=/device:GPU:0)
- conv2d 64, [4, 4], stride=2 , net ->  Tensor("Online_1/Conv_1/Relu:0", shape=(32, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- conv2d 64, [3, 3], stride=1 , net ->  Tensor("Online_1/Conv_2/Relu:0", shape=(32, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- flatten , net ->  Tensor("Online_1/Flatten/flatten/Reshape:0", shape=(32, 16384), dtype=float32, device=/device:GPU:0)
- 512 , net ->  Tensor("Online_1/fully_connected/Relu:0", shape=(32, 512), dtype=float32, device=/device:GPU:0)
- fully_connected , net ->  Tensor("Online_1/fully_connected_1/BiasAdd:0", shape=(32, 255), dtype=float32, device=/device:GPU:0)
----before self.target_convnet(self._replay.next_states)), self._replay.next_states =  Tensor("sample_replay/sample_replay/StagingArea_get:3", shape=(32, 128, 128, 12), dtype=uint8, device=/device:CPU:0)
- --------in RainbowRGBAgent network_template---------
-!!!!!!!1 tf.float32 , net ->  Tensor("Target/Cast:0", shape=(32, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- div 255 , net ->  Tensor("Target/div:0", shape=(32, 128, 128, 12), dtype=float32, device=/device:GPU:0)
- conv2d 32, [8,8], stride=4 , net ->  Tensor("Target/Conv/Relu:0", shape=(32, 32, 32, 32), dtype=float32, device=/device:GPU:0)
- conv2d 64, [4, 4], stride=2 , net ->  Tensor("Target/Conv_1/Relu:0", shape=(32, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- conv2d 64, [3, 3], stride=1 , net ->  Tensor("Target/Conv_2/Relu:0", shape=(32, 16, 16, 64), dtype=float32, device=/device:GPU:0)
- flatten , net ->  Tensor("Target/Flatten/flatten/Reshape:0", shape=(32, 16384), dtype=float32, device=/device:GPU:0)
- 512 , net ->  Tensor("Target/fully_connected/Relu:0", shape=(32, 512), dtype=float32, device=/device:GPU:0)
- fully_connected , net ->  Tensor("Target/fully_connected_1/BiasAdd:0", shape=(32, 255), dtype=float32, device=/device:GPU:0)
-self.state_ph=  Tensor("state_ph:0", shape=(1, 128, 128, 12), dtype=uint8, device=/device:GPU:0)
--------unbundle-----
-checkpoint_dir = /home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_128_1obj/checkpoints, iteration_number=25
-save_elements attr =  $store$_observation
-save_elements attr =  $store$_action
-save_elements attr =  $store$_reward
-save_elements attr =  $store$_terminal
-save_elements attr =  add_count
-save_elements attr =  invalid_range
-save_elements attr =  two_image_observation
-[E] in tf.errors.NotFoundError!!!!, e ->  Missing file: /home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_128_1obj/checkpoints/two_image_observation_ckpt.25.gz
-Creating window glfw
-Found 1 GPUs for rendering. Using device 0.
-Steps executed: 3 Episode length: 3 Return: -1.002Steps executed: 5 Episode length: 2 Return: -1.001Steps executed: 6 Episode length: 1 Return: -1.0Steps executed: 15 Episode length: 9 Return: -1.008Steps executed: 18 Episode length: 3 Return: -1.002Steps executed: 20 Episode length: 2 Return: -1.001Steps executed: 26 Episode length: 6 Return: -1.005Steps executed: 32 Episode length: 6 Return: -1.005Steps executed: 36 Episode length: 4 Return: -1.0005786934511203Steps executed: 50 Episode length: 14 Return: -1.0118400918417412Steps executed: 52 Episode length: 2 Return: -1.001

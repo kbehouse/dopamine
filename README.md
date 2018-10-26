@@ -22,13 +22,11 @@ python -um dopamine.fetch_cam_train.train_rgb \
   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_84_3obj_white \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
 ```
-
-
 ```
-python -um dopamine.fetch_cam_train.train_siamese \
+python -um dopamine.fetch_cam_train.train_rgb \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_siamese_128_5kQupdate \
-  --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin'
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_test \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
 ```
 
 ## train 3obj 
@@ -69,24 +67,23 @@ python -um dopamine.fetch_cam_train.train_siamese_render \
   --hsv=True
 ```
 
-<<<<<<< HEAD
 ```
 python -um dopamine.fetch_cam_train.train_siamese \
   --agent_name=rainbow \
   --base_dir=/home/iclab/phd/DRL/dopamine/log/_collection_fetch_cam_rainbow_siamese/fetch_cam_rainbow_siamese_84_hsv_r_measure_subtract \
   --gin_files='dopamine/fetch_cam_train/rainbow_siamese.gin' \
   --hsv=True
-=======
-
-# run pick and place
 ```
 
-python -um dopamine.fetch_cam_train.train_rgb \
+# run RGB gripper
+
+```
+python -um dopamine.fetch_cam_train.train_rgb_gripper \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_pick_place_test \
-  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
->>>>>>> d818ee94f92d07be8f840c6d15bcf39e420d054c
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_gripper \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```
+
 
 ### Acknowledgement
 

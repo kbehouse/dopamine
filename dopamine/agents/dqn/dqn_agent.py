@@ -319,6 +319,7 @@ class DQNAgent(object):
     Returns:
       int, the selected action.
     """
+    # print('in DQN begin_episode')
     self._reset_state()
     self._record_observation(observation)
 

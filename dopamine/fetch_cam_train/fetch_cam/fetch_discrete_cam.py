@@ -67,6 +67,10 @@ class FetchDiscreteCamEnv:
     def gripper_state(self):
         return self.env.gripper_state
 
+    @property
+    def is_gripper_close(self):
+        return self.env.is_gripper_close
+
     def reset(self):
         self.env.rand_objs_color(exclude_obj0 = True)
         self.env.reset()

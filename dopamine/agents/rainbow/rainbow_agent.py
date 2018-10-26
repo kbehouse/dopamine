@@ -200,6 +200,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
     Raises:
       ValueError: if given an invalid replay scheme.
     """
+    print('in ORI rainbow _build_replay_buffer')
     if self._replay_scheme not in ['uniform', 'prioritized']:
       raise ValueError('Invalid replay scheme: {}'.format(self._replay_scheme))
     return prioritized_replay_buffer.WrappedPrioritizedReplayBuffer(
@@ -338,9 +339,14 @@ class RainbowAgent(dqn_agent.DQNAgent):
         is 1. If the replay scheme is prioritized, the default priority is the
         maximum ever seen [Schaul et al., 2015].
     """
+    # print('rainbow agent priority = ', priority)
     if priority is None:
+      # print(' self._replay_scheme=',  self._replay_scheme ,', self._replay.memory.sum_tree.max_recorded_priority=', self._replay.memory.sum_tree.max_recorded_priority)
       priority = (1. if self._replay_scheme == 'uniform' else
                   self._replay.memory.sum_tree.max_recorded_priority)
+
+    # print('rainbow agent priority after = ', priority)
+
 
     if not self.eval_mode:
       self._replay.add(last_observation, action, reward, is_terminal, priority)
