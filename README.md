@@ -75,11 +75,21 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --hsv=True
 ```
 
+
+# run pick & place
+
+
+```
+python -um dopamine.fetch_cam_train.train_pick_place \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_pick_place_r_measure_r_place_measure \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+```
+
 # run RGB gripper
 
 ```
 python -um dopamine.fetch_cam_train.train_rgb_gripper \
-  --agent_name=rainbow \
   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_gripper \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```

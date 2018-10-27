@@ -547,7 +547,7 @@ class OutOfGraphReplayBuffer(object):
         elif element.name == 'indices':
           element_array[batch_element] = state_index
         elif element.name == 'next_gripper':
-          element_array[batch_element] =  (self._store['gripper'][next_state_index])
+          element_array[batch_element] =  (self._store['gripper'][ (next_state_index) % self._replay_capacity])
         elif element.name in self._store.keys():
           element_array[batch_element] = (
               self._store[element.name][state_index])
