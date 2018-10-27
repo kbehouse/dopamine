@@ -263,7 +263,9 @@ class Runner(object):
     # Keep interacting until we reach a terminal state.
     while True:
       observation, reward, is_terminal = self._run_one_step(action)
-
+      # if action ==4:
+      #   print('--------after pick----------')
+      # print(f'r = {reward:6.4f}, sum_r = {total_reward:5.2f}, a = {action}')
       total_reward += reward
       step_number += 1
 

@@ -82,7 +82,7 @@ python -um dopamine.fetch_cam_train.train_siamese \
 ```
 python -um dopamine.fetch_cam_train.train_pick_place \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_pick_place_r_measure_r_place_measure \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_pick_r_measure_place_r_measure \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
 ```
 

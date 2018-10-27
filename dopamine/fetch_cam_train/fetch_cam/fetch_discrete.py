@@ -135,7 +135,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         r = -0.001
         max_dis = 0.1000
         if arm_2_obj_xy  < max_dis:
-            r =  (max_dis - arm_2_obj_xy ) / max_dis *0.01
+            r =  (max_dis - arm_2_obj_xy ) / max_dis *0.001
             # print('r = %.2f' % r ,'pos_xy = ', pos_xy,', obj_xy = ', obj_xy,', arm_2_obj_xy = ', arm_2_obj_xy)
 
         return r
@@ -149,7 +149,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         r = -0.001
         max_dis = 0.1000
         if arm_2_tray_xy  < max_dis:
-            r =  (max_dis - arm_2_tray_xy ) / max_dis *0.01
+            r =  (max_dis - arm_2_tray_xy ) / max_dis *0.001
             # print('r = %.2f' % r ,'pos_xy = ', pos_xy,', obj_xy = ', obj_xy,', arm_2_obj_xy = ', arm_2_obj_xy)
 
         return r
