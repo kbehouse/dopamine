@@ -294,7 +294,7 @@ class RainbowRGBGripperAgent(RainbowAgent):
     # print('rainbow rgb gripper agent priority after = ', priority)
 
     if not self.eval_mode:
-      self._replay.add(last_observation, action, reward, is_terminal, priority, gripper)
+      self._replay.add(last_observation, action, reward, is_terminal,  gripper, priority)
 
   def step(self, reward, observation, gripper):
     """Records the most recent transition and returns the agent's next action.
