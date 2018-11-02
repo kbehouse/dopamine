@@ -186,7 +186,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         
         if pick:
             if  self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
-                reward = 0.5
+                reward = 1.0 # 0.5
                 ori_xy = object_pos[:2]
                 new_xy = new_object_pos[:2]
                 
@@ -229,15 +229,16 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     def step(self, action):
         reward = 0.0
         self.use_step += 1
-        done = True  if self.use_step >= 150 else False
+        done = True  if self.use_step >= 100 else False
         
         if action[4]==1:
             reward = self.pick_place(True)
             # self.hold_gripper_close = True
-            if reward == -1:
-                done = True
-            else:
-                reward = reward # no reward test!!
+            # if reward == -1:
+            #     done = True
+            # else:
+            #     reward = reward # no reward test!!
+            done = True
         elif action[5]==1:
             if self.is_gripper_close:
                 reward = self.pick_place(False)

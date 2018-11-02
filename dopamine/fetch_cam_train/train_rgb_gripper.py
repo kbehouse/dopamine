@@ -55,7 +55,7 @@ FLAGS = flags.FLAGS
 
 def create_agent(sess, environment, summary_writer=None):
   return rainbow_rgb_gripper_agent.RainbowRGBGripperAgent(
-        sess, num_actions=6,
+        sess, num_actions=5,
         summary_writer=summary_writer)
 
 def create_runner(base_dir, create_agent_fn):
