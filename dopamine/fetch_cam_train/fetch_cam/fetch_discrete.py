@@ -331,6 +331,25 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         # self.render()
         # self.gripper_to_init()
 
+    def hide_red_tray(self):
+       
+        # hide obj1, obj2
+        obj_z =  self.red_tray_pos[2]
+        obj_hide_z = obj_z - 0.15
+
+        
+        obj_joint_name = 'red_tray'
+        # print("modify ", obj_joint_name)
+        object_qpos = self.sim.data.get_body_xpos('red_tray')
+        print('red_tray object_qpos = ', object_qpos)
+        assert object_qpos.shape == (3,)
+        object_qpos[2] = obj_hide_z
+
+        self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
+        # self.sim.data.set_body_xpos(obj_joint_name, object_qpos)
+
+        self.sim.forward()
+        self._step_callback()
     # def rand_objs_color(self):
     #     for i in range(3):
     #         obj_name = 'object%d' % i

@@ -94,6 +94,12 @@ python -um dopamine.fetch_cam_train.train_rgb_gripper \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```
 
+## test gripper 100 steps episode, 5 action, only pick 
+```
+python -um dopamine.fetch_cam_train.train_rgb_gripper \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rgb_gripper_only_pick_100_step_5_action \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
+```
 
 ### Acknowledgement
 
