@@ -34,6 +34,9 @@ python -um dopamine.fetch_cam_train.train_rgb \
 
 
 
+python -um dopamine.fetch_cam_train.train_rgb   --agent_name=rainbow   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_test
+--gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+
 ## hsv 
 ```
 python -um dopamine.fetch_cam_train.train_siamese \
@@ -94,6 +97,20 @@ python -um dopamine.fetch_cam_train.train_rgb_gripper \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```
 
+## test gripper 100 steps episode, 5 action, only pick 
+```
+python -um dopamine.fetch_cam_train.train_rgb_gripper \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rgb_gripper_only_pick_100_step_5_action \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
+```
+
+
+# train curiosity
+```
+python -um dopamine.fetch_cam_train.train_curiosity \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/curiosity \
+  --gin_files='dopamine/fetch_cam_train/rainbow_curiosity.gin'
+```
 
 ### Acknowledgement
 

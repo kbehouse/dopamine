@@ -98,6 +98,7 @@ class RainbowRGBAgent(RainbowAgent):
       self._replay = self._build_replay_buffer(use_staging)
 
       self._build_networks()
+      self._build_other()
 
       self._train_op = self._build_train_op()
       self._sync_qt_ops = self._build_sync_op()
@@ -115,6 +116,9 @@ class RainbowRGBAgent(RainbowAgent):
     self._observation = None
     self._last_observation = None
 
+  def _build_other(self):
+    print('in RainbowRGBAgent _build_other')
+    # pass
 
   def _network_template(self, state):
     """Builds a convolutional network that outputs Q-value distributions.
