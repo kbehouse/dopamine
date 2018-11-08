@@ -5,6 +5,7 @@ from fetch_cam.utils import robot_get_obs
 from mujoco_py.modder import TextureModder
 from matplotlib.colors import hsv_to_rgb, rgb_to_hsv
 import random
+import cv2 
 
 class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     '''
@@ -15,16 +16,19 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         [0, 0, 0, 0, 1]: gripper down and close gripper
 
     '''
-    def __init__(self, reward_type='sparse', dis_tolerance = 0.001, step_ds=0.005, is_render=False):
+    def __init__(self, reward_type='sparse', dis_tolerance = 0.001, step_ds=0.005, use_tray=True,  is_render=False):
         initial_qpos = {
             'robot0:slide0': 0.405,
             'robot0:slide1': 0.48,
             'robot0:slide2': 0.0,
             'object0:joint': [1.25, 0.53, 0.4, 1., 0., 0., 0.],
         }
+
+        env_xml_name = 'fetch/pick_and_place_tray.xml' if use_tray else 'fetch/pick_and_place.xml'
+
         fetch_env.FetchEnv.__init__(
             # self, 'fetch/pick_and_place.xml', has_object=True, block_gripper=False, n_substeps=20,
-            self, 'fetch/pick_and_place_tray.xml', has_object=True, block_gripper=False, n_substeps=20,
+            self, env_xml_name , has_object=True, block_gripper=False, n_substeps=20,
             gripper_extra_height=0.2, target_in_the_air=True, target_offset=0.0,
             obj_range=0.15, target_range=0.15, distance_threshold=0.05,
             initial_qpos=initial_qpos, reward_type=reward_type)
@@ -33,6 +37,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         self.dis_tolerance = dis_tolerance
         self.ds = step_ds     # each step run distance, [1,0,0,0] run dx = 0.01
         self.is_render = is_render
+        self.use_tray = use_tray
 
         # self.hold_gripper_close = False
 
@@ -186,7 +191,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         
         if pick:
             if  self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
-                reward = 0.5
+                reward = 0.5 if self.use_tray else 1.0  #0.5
                 ori_xy = object_pos[:2]
                 new_xy = new_object_pos[:2]
                 
@@ -200,6 +205,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             else:
                 reward = -1
         else:
+            assert self.use_tray==True,'Strange!' 
             # diff_tray_xy = np.linalg.norm( new_object_pos[:2] - self.red_tray_pos[:2]) 
             diff_tray_xy = np.linalg.norm( self.pos[:2] - self.red_tray_pos[:2]) 
             # print('diff_tray_xy = ', diff_tray_xy)   
@@ -234,11 +240,11 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         if action[4]==1:
             reward = self.pick_place(True)
             # self.hold_gripper_close = True
-            if reward == -1:
+            if reward == -1 or not self.use_tray:
                 done = True
-            else:
-                reward = reward # no reward test!!
+            
         elif action[5]==1:
+            assert self.use_tray==True,'Strange!' 
             if self.is_gripper_close:
                 reward = self.pick_place(False)
             else:
@@ -258,7 +264,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 done = True
                 reward = -1
             else:
-                if self.is_gripper_close:
+                if self.use_tray and self.is_gripper_close:
                     reward = self.measure_tray_reward() # 0
                 else:
                     reward =self.measure_obj_reward() # 0
@@ -356,6 +362,32 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         self.sim.model.mat_rgba[mat_id] = rgba # [0., 1., 0.,1.]
 
 
+    def one_hsv_2_rgb(self, h, s, v):
+        hsv_one_color = np.uint8([[[h,s,v ]]]) 
+        hsv2rgb = cv2.cvtColor(hsv_one_color, cv2.COLOR_HSV2RGB)
+        return hsv2rgb[0][0][0], hsv2rgb[0][0][1], hsv2rgb[0][0][2]
+
+
+    def rand_red_or_not(self, obj_name, use_red_color):
+        if use_red_color:
+            h = np.random.randint(174,179)
+            s = np.random.randint(211,255)
+            v = np.random.randint(40 ,255)
+        else:
+            h = np.random.randint(0,150)
+            s = np.random.randint(0,255)
+            v = np.random.randint(0 ,255)
+        
+        r, g, b = self.one_hsv_2_rgb(h, s, v)
+        color = [r/255.0, g/255.0, b/255.0, 1.0]
+        try:
+            self.set_obj_color(obj_name, color)
+        except Exception as e :
+            # pass
+            print('[E] fail to set color to ' , obj_name,', becase e -> ', e )
+
+        self.sim.forward()
+
 
     def rand_objs_color(self, exclude_obj0 = False):
         start_obj = 0 if exclude_obj0==False else 1
@@ -424,5 +456,37 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
 
         self.sim.forward()
         self._step_callback()
+
+
+    def generate_3_obj_pos(self):
+        assert self.has_object == True, 'self.has_object != True'
+        
+
+        obj_pos_ary =[]
+        if self.use_tray:
+            red_tray_pos = self.sim.data.get_body_xpos('red_tray')
+
+            
+            for i in range(3):
+                obj_gripper_dis = 0
+                object_xpos = self.initial_gripper_xpos[:2]
+
+                while  obj_gripper_dis < 0.1 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) or obj_tray_dis < 0.05 :
+                    object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
+                    obj_gripper_dis = np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2])
+                    obj_tray_dis = np.linalg.norm(object_xpos -red_tray_pos[:2])
+
+                obj_pos_ary.append(object_xpos)
+        else:
+            for i in range(3):
+                obj_gripper_dis = 0
+                object_xpos = self.initial_gripper_xpos[:2]
+                while  obj_gripper_dis < 0.1 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) :
+                    object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
+                    obj_gripper_dis = np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2])
+
+                obj_pos_ary.append(object_xpos)
+
+        return obj_pos_ary
 
             

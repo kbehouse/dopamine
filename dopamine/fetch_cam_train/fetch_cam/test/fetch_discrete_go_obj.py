@@ -157,7 +157,7 @@ def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False, 
     
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=gray_img, is_render=is_render, only_show_obj0 = only_show_obj0)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=gray_img,use_tray=False, is_render=is_render, only_show_obj0 = only_show_obj0)
     # obs = env.reset()
     # done = False
 
@@ -203,6 +203,7 @@ def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False, 
                 break
             step_count +=1
             s,r, d, info =  env.step(a)
+            print('r = ', r)
             sum_r += r  
             
             # print('s shape = ', np.shape(s))
@@ -348,6 +349,6 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = 
 # go_obj()
 
 # go_obj_savepic_with_camenv(gray_img=False)
-go_obj_savepic_with_camenv(gray_img=True, noise=False, is_render=True, only_show_obj0 = True)
+go_obj_savepic_with_camenv(gray_img=False, noise=False, is_render=True, only_show_obj0 = False)
 # go_obj_savepic_siamese()
 # go_obj_savepic_siamese(hsv_color=True, rand_pick_obj=True, noise=False)
