@@ -30,9 +30,6 @@ python -um dopamine.fetch_cam_train.train_rgb \
 ```
 
 # train 3obj 
- python -um dopamine.fetch_cam_train.train_rgb   --agent_name=rainbow   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_84_3obj_white_r0_measure_r1_dismodify   --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
-
-
 ```
 python -um dopamine.fetch_cam_train.train_rgb \
   --agent_name=rainbow \
