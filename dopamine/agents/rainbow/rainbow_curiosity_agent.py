@@ -18,7 +18,7 @@ import random
 import math
 # slim = tf.contrib.slim
 from dopamine.agents.rainbow.utils import conv, fc
-
+slim = tf.contrib.slim
 
 def to2d(x):
   size = 1
@@ -32,7 +32,8 @@ class RainbowCuriosityAgent(RainbowRGBAgent):
   
   def _build_other(self):
     print('in RainbowCuriosityAgent _build_other()')
-    self._build_curiosity(convfeat=32, rep_size=512, enlargement=2)
+    self._build_ICM()
+    # self._build_curiosity(convfeat=32, rep_size=512, enlargement=2)
     # pass
 
   # from https://github.com/openai/random-network-distillation/blob/master/policies/cnn_policy_param_matched.py
@@ -113,7 +114,65 @@ class RainbowCuriosityAgent(RainbowRGBAgent):
     print('self.aux_loss-> ', self.aux_loss)
 
 
+  def _build_ICM(self):
+    self.icm_nu = 0.0001
+    self.icm_beta = 0.1
+    print('-------build ICM-----')
+    print('num_actions = ', self.num_actions)
+    print('self._replay.states = ', self._replay.states)
+    print('self._replay.actions = ', self._replay.actions)
+    # Input
+    s_current = tf.cast(self._replay.states, tf.float32)
+    s_current = tf.div(s_current, 255.)
 
+    s_next = tf.cast(self._replay.next_states, tf.float32)
+    s_next = tf.div(s_current, 255.)
+
+    weights_initializer = slim.variance_scaling_initializer(
+        factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
+
+    # Feature Vector
+    feature_s = slim.conv2d(s_current, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s = slim.conv2d(feature_s, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s = slim.conv2d(feature_s, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s = slim.conv2d(feature_s, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s_flat = slim.flatten(feature_s)
+
+    print('feature_s flatten -> ', feature_s_flat)
+
+    
+    feature_s_next = slim.conv2d(s_next, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s_next = slim.conv2d(feature_s_next, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s_next = slim.conv2d(feature_s_next, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s_next = slim.conv2d(feature_s_next, 32, [3, 3], stride=2, activation_fn=tf.nn.elu, weights_initializer=weights_initializer)
+    feature_s_next_flat = slim.flatten(feature_s_next)
+
+    print('feature_s_next_flat flatten -> ', feature_s_next_flat)
+
+    # Forward Model
+    # a_t = tf.placeholder(tf.float32, shape = [None, self.Num_action])
+    action_one_hot = tf.one_hot(self._replay.actions, self.num_actions) 
+    print('action_one_hot->', action_one_hot)
+    input_forward = tf.concat([feature_s_flat, action_one_hot], 1)
+    forward_fc1 = slim.fully_connected( input_forward, 256, weights_initializer=weights_initializer)
+    forward_fc2 = slim.fully_connected( forward_fc1, 1152, weights_initializer=weights_initializer)
+
+    # r_i = (self.icm_nu * 0.5) * tf.reduce_mean(tf.square(tf.subtract(forward_fc2, feature_s_next_flat)), axis = 1)
+
+    self.icm_Lf = tf.reduce_mean(tf.reduce_sum((0.5) * tf.square(tf.subtract(forward_fc2, feature_s_next_flat)), axis = 1))
+
+    # Inverse Model
+    input_inverse = tf.concat([feature_s_flat, feature_s_next_flat], 1)
+    inverse_fc1 = slim.fully_connected( input_inverse, 256, weights_initializer=weights_initializer)
+    inverse_fc2 = slim.fully_connected( inverse_fc1, self.num_actions, weights_initializer=weights_initializer)
+    inverse_fc2 = tf.nn.softmax(inverse_fc2)
+
+    print('inverse_fc1.shape -> ', inverse_fc1.shape)
+    print('inverse_fc2.shape -> ', inverse_fc2.shape)
+
+    self.icm_Li = tf.reduce_mean(tf.reduce_sum(tf.square(tf.subtract(action_one_hot, inverse_fc2)), axis = 1))
+
+    # return s_current, s_next, a_t, r_i, Lf, Li
 
   def _build_train_op(self):
     """Builds a training op.
@@ -159,7 +218,8 @@ class RainbowCuriosityAgent(RainbowRGBAgent):
       # Weight the loss by the inverse priorities.
       # loss = loss_weights * loss 
       ori_loss = loss_weights * loss 
-      loss = ori_loss + self.aux_loss
+      # loss = ori_loss + self.aux_loss
+      loss = ori_loss + (self.icm_beta * self.icm_Lf) + ((1-self.icm_beta) * self.icm_Li)
       print('loss-> ', loss)
     else:
       update_priorities_op = tf.no_op()
@@ -168,7 +228,9 @@ class RainbowCuriosityAgent(RainbowRGBAgent):
       if self.summary_writer is not None:
         with tf.variable_scope('Losses'):
           tf.summary.scalar('ori_loss', tf.reduce_mean(ori_loss))
-          tf.summary.scalar('aux_loss', tf.reduce_mean(self.aux_loss))
+          # tf.summary.scalar('aux_loss', tf.reduce_mean(self.aux_loss))
+          tf.summary.scalar('Loss of Forward', tf.reduce_mean(self.icm_beta * self.icm_Lf))
+          tf.summary.scalar('Loss of Inverse', tf.reduce_mean((1-self.icm_beta) * self.icm_Li) )
           tf.summary.scalar('CrossEntropyLoss', tf.reduce_mean(loss))
       # Schaul et al. reports a slightly different rule, where 1/N is also
       # exponentiated by beta. Not doing so seems more reasonable, and did not

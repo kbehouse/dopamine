@@ -112,6 +112,13 @@ python -um dopamine.fetch_cam_train.train_curiosity \
   --gin_files='dopamine/fetch_cam_train/rainbow_curiosity.gin'
 ```
 
+## ICM
+```
+python -um dopamine.fetch_cam_train.train_curiosity \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/icm \
+  --gin_files='dopamine/fetch_cam_train/rainbow_curiosity.gin'
+```
+
 ### Acknowledgement
 
 If you use Dopamine in your work, we ask that you cite this repository as a
