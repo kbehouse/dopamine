@@ -140,7 +140,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
       net_type: _network_type object defining the outputs of the network.
     """
     return collections.namedtuple('c51_network',
-                                  ['q_values', 'logits', 'probabilities'])
+                                  ['q_values', 'logits', 'probabilities','know_output_layer'])
 
   def _network_template(self, state):
     """Builds a convolutional network that outputs Q-value distributions.

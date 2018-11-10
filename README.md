@@ -30,13 +30,30 @@ python -um dopamine.fetch_cam_train.train_rgb \
 ```
 
 # train 3obj 
+
+## range red color
 ```
 python -um dopamine.fetch_cam_train.train_rgb \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_rgb_84_3obj_range_red_color \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_rgb_84_3obj_range_red_color_r_measure_iter19  \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
 ```
 
+## spatial softmax
+```
+python -um dopamine.fetch_cam_train.train_rgb \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_rgb_84_3obj_range_red_color_r_measure_spatialmax  \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+```
+
+## try get last layer
+```
+python -um dopamine.fetch_cam_train.train_rgb \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_rgb_84_3obj_white \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+```
 
 ## hsv 
 ```
