@@ -232,6 +232,7 @@ def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False, 
 
     print('use time = {:.2f}'.format(time.time()-s_time))
 
+'''
 def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = False, noise = False):
     if os.path.exists('tmp/'):
         shutil.rmtree('tmp/') 
@@ -344,7 +345,7 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = 
     use_time = time.time()-s_time
     print('use time = {:.2f}'.format(use_time))
     print('steps / second = {:.2f}'.format(all_ep_steps / use_time))
-    
+'''    
 # go_obj_savepic()
 # go_obj()
 
