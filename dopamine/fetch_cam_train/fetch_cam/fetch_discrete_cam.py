@@ -31,7 +31,8 @@ class FetchDiscreteCamEnv:
                     mode='offscreen', device_id=-1)
         rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
             mode='offscreen', device_id=-1)
-
+        
+        rgb_gripper =  cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
         if self.is_render:
             if self.gray_img:
                 # resize_img = cv2.resize(rgb_gripper, (256, 256), interpolation=cv2.INTER_AREA)
@@ -98,6 +99,6 @@ class FetchDiscreteCamEnv:
     
     def render_gripper_img(self, gripper_img):
         # if self.is_render:
-        rgb_img = cv2.cvtColor(gripper_img, cv2.COLOR_BGR2RGB)
-        cv2.imshow('Gripper Image',rgb_img)
+        # rgb_img = cv2.cvtColor(gripper_img, cv2.COLOR_BGR2RGB)
+        cv2.imshow('Gripper Image',gripper_img)
         cv2.waitKey(50)

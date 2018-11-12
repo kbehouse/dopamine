@@ -212,8 +212,8 @@ def go_obj_savepic_with_camenv(is_render = True, gray_img = False, noise=False, 
             if gray_img:
                 cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s[:,:,0])
             else:
-                rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
-                cv2.imwrite(save_dir + '/%03d.jpg' % step_count, rgb_img)
+                # rgb_img = cv2.cvtColor(s, cv2.COLOR_BGR2RGB)
+                cv2.imwrite(save_dir + '/%03d.jpg' % step_count, s)
             
             # img = Image.fromarray(s[:,:,0], 'RGB')
             # # img.save(save_dir + '/%03d.jpg' % step_count)
@@ -350,6 +350,6 @@ def go_obj_savepic_siamese(is_render = True, hsv_color = False, rand_pick_obj = 
 # go_obj()
 
 # go_obj_savepic_with_camenv(gray_img=False)
-go_obj_savepic_with_camenv(gray_img=False, noise=False, is_render=True, only_show_obj0 = False)
+go_obj_savepic_with_camenv(gray_img=False, noise=False, is_render=True, only_show_obj0 = True)
 # go_obj_savepic_siamese()
 # go_obj_savepic_siamese(hsv_color=True, rand_pick_obj=True, noise=False)

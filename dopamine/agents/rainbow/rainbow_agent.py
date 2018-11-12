@@ -168,6 +168,8 @@ class RainbowAgent(dqn_agent.DQNAgent):
     print(' conv2d 64, [4, 4], stride=2 , net -> ', net)
     net = slim.conv2d(
         net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+
+    output_layer = net
     print(' conv2d 64, [3, 3], stride=1 , net -> ', net)
     net = slim.flatten(net)
     print(' flatten , net -> ', net)
@@ -185,7 +187,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
     logits = tf.reshape(net, [-1, self.num_actions, self._num_atoms])
     probabilities = tf.contrib.layers.softmax(logits)
     q_values = tf.reduce_sum(self._support * probabilities, axis=2)
-    return self._get_network_type()(q_values, logits, probabilities)
+    return self._get_network_type()(q_values, logits, probabilities, output_layer)
 
   def _build_replay_buffer(self, use_staging):
     """Creates the replay buffer used by the agent.
