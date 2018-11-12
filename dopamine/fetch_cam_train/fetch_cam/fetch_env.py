@@ -200,6 +200,8 @@ class FetchEnv(robot_env.RobotEnv):
                     object_qpos[:2] = obj_pos_ary[i]
                     object_qpos[2] = obj_z if i>=1 else  object_qpos[2]
                         
+                    object_qpos[3:] = [0.7071068, 0, 0, 0.7071068]
+                    # print('obj_joint_name-> ', obj_joint_name, ',object_qpos = ', object_qpos)
                     self.sim.data.set_joint_qpos(obj_joint_name, object_qpos)
                 except Exception as e :
                     # print('e -> ', e )

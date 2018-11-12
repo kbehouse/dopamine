@@ -192,15 +192,15 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
         if pick:
             if  self.gripper_state[0] > 0.01 and (new_object_pos[2]-object_pos[2])>=0.2: # need to higher than 20cm    
                 reward = 0.5 if self.use_tray else 1.0  #0.5
-                ori_xy = object_pos[:2]
-                new_xy = new_object_pos[:2]
+                # ori_xy = object_pos[:2]
+                # new_xy = new_object_pos[:2]
                 
-                diff_xy = np.linalg.norm(new_xy -ori_xy)    
-                diff_xy = diff_xy / 0.01  # to cm
+                # diff_xy = np.linalg.norm(new_xy -ori_xy)    
+                # diff_xy = diff_xy / 0.01  # to cm
 
-                # print('diff_xy = ', diff_xy)
+                # # print('diff_xy = ', diff_xy)
 
-                reward-= diff_xy * 0.01
+                # reward-= diff_xy * 0.01
 
             else:
                 reward = -1
@@ -471,7 +471,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 obj_gripper_dis = 0
                 object_xpos = self.initial_gripper_xpos[:2]
 
-                while  obj_gripper_dis < 0.1 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) or obj_tray_dis < 0.05 :
+                while  obj_gripper_dis < 0.15 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) or obj_tray_dis < 0.15: #0.05 :
                     object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
                     obj_gripper_dis = np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2])
                     obj_tray_dis = np.linalg.norm(object_xpos -red_tray_pos[:2])
@@ -481,7 +481,8 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
             for i in range(3):
                 obj_gripper_dis = 0
                 object_xpos = self.initial_gripper_xpos[:2]
-                while  obj_gripper_dis < 0.1 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) :
+                #while  obj_gripper_dis < 0.1 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.1) :
+                while  obj_gripper_dis < 0.15 or self.check_dis_any_small_threshold(obj_pos_ary, object_xpos , 0.15) :
                     object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
                     obj_gripper_dis = np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2])
 

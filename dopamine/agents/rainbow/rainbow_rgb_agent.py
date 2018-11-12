@@ -160,12 +160,10 @@ class RainbowRGBAgent(RainbowAgent):
     return self._get_network_type()(q_values, logits, probabilities, output_layer)
 
 
-  def _network_template_old(self, state):
+  def _network_template_ori(self, state):
     """Builds a convolutional network that outputs Q-value distributions.
-
     Args:
     state: `tf.Tensor`, contains the agent's current state.
-
     Returns:
     net: _network_type object containing the tensors output by the network.
     """
@@ -175,26 +173,26 @@ class RainbowRGBAgent(RainbowAgent):
         factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
 
     net = tf.cast(state, tf.float32)
-    # print('!!!!!!!1 tf.float32 , net -> ', net)
+    print('!!!!!!!1 tf.float32 , net -> ', net)
     net = tf.div(net, 255.)
-    # print(' div 255 , net -> ', net)
-    net = slim.conv2d( net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
-    # print(' conv2d 32, [8,8], stride=4 , net -> ', net)
-    net = slim.conv2d( net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
-    # print(' conv2d 64, [4, 4], stride=2 , net -> ', net)
-    net = slim.conv2d( net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
-    # print(' conv2d 64, [3, 3], stride=1 , net -> ', net)
-
-
-    net = tf.contrib.layers.spatial_softmax
-    # self.output_layer = net
+    print(' div 255 , net -> ', net)
+    net = slim.conv2d(
+        net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
+    print(' conv2d 32, [8,8], stride=4 , net -> ', net)
+    net = slim.conv2d(
+        net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
+    print(' conv2d 64, [4, 4], stride=2 , net -> ', net)
+    net = slim.conv2d(
+        net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+    print(' conv2d 64, [3, 3], stride=1 , net -> ', net)
     output_layer = net
-    print('self.output_layer -> ', output_layer)
+    
     net = slim.flatten(net)
     print(' flatten , net -> ', net)
     net = slim.fully_connected(
         net, 512, weights_initializer=weights_initializer)
-    # print(' 512 , net -> ', net)
+
+    print(' 512 , net -> ', net)
     net = slim.fully_connected(
         net,
         self.num_actions * self._num_atoms,
@@ -205,9 +203,7 @@ class RainbowRGBAgent(RainbowAgent):
 
     logits = tf.reshape(net, [-1, self.num_actions, self._num_atoms])
     probabilities = tf.contrib.layers.softmax(logits)
-    print('probabilities -> ', probabilities)
     q_values = tf.reduce_sum(self._support * probabilities, axis=2)
-    print('q_values -> ', q_values)
     return self._get_network_type()(q_values, logits, probabilities, output_layer)
 
   def _record_observation(self, observation):

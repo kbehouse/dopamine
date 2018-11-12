@@ -43,9 +43,18 @@ python -um dopamine.fetch_cam_train.train_rgb \
 ```
 python -um dopamine.fetch_cam_train.train_rgb \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_rgb_84_3obj_range_red_color_r_measure_spatialmax  \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_rgb_84_3obj_range_red_color_r_measure  \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
 ```
+
+# complex object
+```
+python -um dopamine.fetch_cam_train.train_rgb \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_spatialmax_rgb_84_3obj_complex_obj_r_measure \
+  --gin_files='dopamine/fetch_cam_train/rainbow_rgb.gin'
+```
+
 
 ## try get last layer
 ```
