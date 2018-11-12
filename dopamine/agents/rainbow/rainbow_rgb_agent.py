@@ -117,7 +117,7 @@ class RainbowRGBAgent(RainbowAgent):
 
 
 
-  def _network_template(self, state):
+  def _network_template_spacial(self, state):
     """Builds a convolutional network that outputs Q-value distributions.
 
     Args:
@@ -160,7 +160,7 @@ class RainbowRGBAgent(RainbowAgent):
     return self._get_network_type()(q_values, logits, probabilities, output_layer)
 
 
-  def _network_template_ori(self, state):
+  def _network_template(self, state):
     """Builds a convolutional network that outputs Q-value distributions.
     Args:
     state: `tf.Tensor`, contains the agent's current state.
