@@ -517,3 +517,31 @@ class DQNAgent(object):
                         os.path.join(checkpoint_dir,
                                      'tf_ckpt-{}'.format(iteration_number)))
     return True
+
+  def unbundle_only_graph_dict(self, checkpoint_dir, iteration_number, bundle_dictionary):
+    """Restores the agent from a checkpoint.
+
+    Restores the agent's Python objects to those specified in bundle_dictionary,
+    and restores the TensorFlow objects to those specified in the
+    checkpoint_dir. If the checkpoint_dir does not exist, will not reset the
+      agent's state.
+
+    Args:
+      checkpoint_dir: str, path to the checkpoint saved by tf.Save.
+      iteration_number: int, checkpoint version, used when restoring replay
+        buffer.
+      bundle_dictionary: dict, containing additional Python objects owned by
+        the agent.
+
+    Returns:
+      bool, True if unbundling was successful.
+    """
+    print('-------unbundle_only_graph-----')
+    for key in self.__dict__:
+      if key in bundle_dictionary:
+        self.__dict__[key] = bundle_dictionary[key]
+    # Restore the agent's TensorFlow graph.
+    self._saver.restore(self._sess,
+                        os.path.join(checkpoint_dir,
+                                     'tf_ckpt-{}'.format(iteration_number)))
+    return True
