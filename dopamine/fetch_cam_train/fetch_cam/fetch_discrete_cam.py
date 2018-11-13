@@ -7,17 +7,20 @@ import numpy as np
 IMG_W_H = 84
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamEnv:
-    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, use_tray = True, is_render = False, only_show_obj0=False):
+    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, hsv_img = True, use_tray = True, is_render = False, only_show_obj0=False):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, use_tray=use_tray, is_render = is_render)
-        self.gray_img = gray_img
+        self.hsv_img = hsv_img
         self.is_render = is_render
         self.only_show_obj0 = only_show_obj0
 
 
     def state_preprocess(self, img):
         resize_img = cv2.resize(img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
-        gray_img = cv2.cvtColor(resize_img, cv2.COLOR_RGB2GRAY)
-        return np.reshape(gray_img,(IMG_W_H,IMG_W_H,1))
+        hsv_img = cv2.cvtColor(resize_img, cv2.COLOR_RGB2HSV)
+        # print('hsv_img.shape = ',hsv_img.shape  )
+        hsv_img = hsv_img[:,:,0]
+        # print('hsv_img.shape = ',hsv_img.shape  )
+        return np.reshape(hsv_img,(IMG_W_H,IMG_W_H,1))
         
 
     def step(self,action):
@@ -34,16 +37,16 @@ class FetchDiscreteCamEnv:
         
         rgb_gripper =  cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
         if self.is_render:
-            if self.gray_img:
+            if self.hsv_img:
                 # resize_img = cv2.resize(rgb_gripper, (256, 256), interpolation=cv2.INTER_AREA)
-                gray_img = cv2.cvtColor(rgb_gripper, cv2.COLOR_RGB2GRAY)
-                cv2.imshow('Gripper Image',gray_img)
+                hsv_img = cv2.cvtColor(rgb_gripper, cv2.COLOR_RGB2HSV)
+                cv2.imshow('Gripper Image',hsv_img)
                 cv2.waitKey(50)
             else: 
                 self.render_gripper_img(rgb_gripper)
 
         # s = self.state_preprocess(rgb_gripper)
-        if self.gray_img:
+        if self.hsv_img:
             s = self.state_preprocess(rgb_gripper)
             return s, r, d, None
         else:
@@ -86,7 +89,7 @@ class FetchDiscreteCamEnv:
         rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
             mode='offscreen', device_id=-1)
     
-        if self.gray_img:
+        if self.hsv_img:
             s = self.state_preprocess(rgb_gripper)
             return s
         else:

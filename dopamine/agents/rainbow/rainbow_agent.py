@@ -158,21 +158,21 @@ class RainbowAgent(dqn_agent.DQNAgent):
 
     net = tf.cast(state, tf.float32)
     print(' tf.float32 , net -> ', net)
-    net = tf.div(net, 255.)
+    net = tf.div(net, 180.)
     print(' div 255 , net -> ', net)
-    net = slim.conv2d(
-        net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
+    net = slim.conv2d(net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     print(' conv2d 32, [8,8], stride=4 , net -> ', net)
-    net = slim.conv2d(
-        net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
+    net = slim.conv2d(net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
     print(' conv2d 64, [4, 4], stride=2 , net -> ', net)
-    net = slim.conv2d(
-        net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
+    net = slim.conv2d(net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
 
     output_layer = net
     print(' conv2d 64, [3, 3], stride=1 , net -> ', net)
-    net = slim.flatten(net)
-    print(' flatten , net -> ', net)
+    # net = slim.flatten(net)
+    # print(' flatten , net -> ', net)
+    net = tf.contrib.layers.spatial_softmax(net)
+    print(' spatial_softmax , net -> ', net)
+
     net = slim.fully_connected(
         net, 512, weights_initializer=weights_initializer)
     print(' 512 , net -> ', net)

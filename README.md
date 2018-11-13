@@ -15,6 +15,14 @@ python -um dopamine.fetch_cam_train.train \
   --gin_files='dopamine/fetch_cam_train/rainbow.gin'
 ```
 
+
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_84_hue_r_measure_realbot_tex \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
+
 ## train only one object with rgb color and 4 pic (12 channels)
 ```
 python -um dopamine.fetch_cam_train.train_rgb \
