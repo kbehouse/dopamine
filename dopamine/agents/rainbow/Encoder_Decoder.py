@@ -84,12 +84,12 @@ def build_encoder_decoder(inputs, num_classes, preset_model = "Encoder-Decoder",
 	#####################
 	# Upsampling path #
 	#####################
-	net = conv_transpose_block(net, 512)
-	net = conv_block(net, 512)
-	net = conv_block(net, 512)
-	net = conv_block(net, 512)
-	if has_skip:
-		net = tf.add(net, skip_4)
+	# net = conv_transpose_block(net, 512)
+	# net = conv_block(net, 512)
+	# net = conv_block(net, 512)
+	# net = conv_block(net, 512)
+	# if has_skip:
+	# 	net = tf.add(net, skip_4)
 
 	net = conv_transpose_block(net, 512)
 	net = conv_block(net, 512)

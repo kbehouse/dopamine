@@ -23,7 +23,7 @@ slim = tf.contrib.slim
 
 
 # TWO_IMG_OBSERVATION_SHAPE = (1, 84, 84, 3)
-STATE_W_H = 224
+STATE_W_H = 128
 dqn_agent.OBSERVATION_SHAPE = (STATE_W_H, STATE_W_H, 3) 
 dqn_agent.STACK_SIZE = 2
 
@@ -157,6 +157,7 @@ class RainbowSegNetAgent(RainbowAgent):
     # net = tf.cast(state, tf.float32)
     # net = tf.div(net, float(self.obj_class))
     # print('segnet_ouput_tensor.shape =', segnet_ouput_tensor.shape)
+    '''
     net = slim.conv2d( segnet_ouput_tensor, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
     net = slim.conv2d( net, 64, [4, 4], stride=2, weights_initializer=weights_initializer)
     net = slim.conv2d( net, 64, [3, 3], stride=1, weights_initializer=weights_initializer)
@@ -164,6 +165,8 @@ class RainbowSegNetAgent(RainbowAgent):
 
     # net = tf.contrib.layers.spatial_softmax(net)
     net = slim.flatten(net)
+    '''
+    net = slim.flatten(segnet_ouput_tensor)
     # print('self.output_layer -> ', output_layer)
     net = slim.fully_connected(
         net, 512, weights_initializer=weights_initializer)

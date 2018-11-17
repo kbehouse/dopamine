@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 
-IMG_W_H = 224
+IMG_W_H = 128
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, use_tray = True, is_render = False, only_show_obj0=False):
