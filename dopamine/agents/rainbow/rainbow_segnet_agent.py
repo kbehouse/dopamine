@@ -19,14 +19,13 @@ import math
 
 # from dopamine.agents.rainbow.VGGSegnet import VGGSegnet
 from dopamine.agents.rainbow.Encoder_Decoder import build_encoder_decoder
-# from keras import backend as K
 slim = tf.contrib.slim
 
 
 # TWO_IMG_OBSERVATION_SHAPE = (1, 84, 84, 3)
 STATE_W_H = 224
 dqn_agent.OBSERVATION_SHAPE = (STATE_W_H, STATE_W_H, 3) 
-dqn_agent.STACK_SIZE = 4
+dqn_agent.STACK_SIZE = 2
 
 @gin.configurable
 class RainbowSegNetAgent(RainbowAgent):
