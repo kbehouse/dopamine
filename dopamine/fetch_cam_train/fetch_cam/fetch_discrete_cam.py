@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 
-IMG_W_H = 84
+IMG_W_H = 224
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, use_tray = True, is_render = False, only_show_obj0=False):
@@ -19,6 +19,23 @@ class FetchDiscreteCamEnv:
         gray_img = cv2.cvtColor(resize_img, cv2.COLOR_RGB2GRAY)
         return np.reshape(gray_img,(IMG_W_H,IMG_W_H,1))
         
+
+    def color_state_preprocess(self, img):
+        imgNorm='sub_mean'
+        if imgNorm == "sub_and_divide":
+            img = np.float32(cv2.resize(img, ( IMG_W_H , IMG_W_H ))) / 127.5 - 1
+        elif imgNorm == "sub_mean":
+            img = cv2.resize(img, ( IMG_W_H , IMG_W_H ))
+            img = img.astype(np.float32)
+            img[:,:,0] -= 103.939
+            img[:,:,1] -= 116.779
+            img[:,:,2] -= 123.68
+        elif imgNorm == "divide":
+            img = cv2.resize(img, ( IMG_W_H , IMG_W_H ))
+            img = img.astype(np.float32)
+            img = img/255.0
+
+        return img
 
     def step(self,action):
         # print('i action = ', action)
@@ -48,6 +65,7 @@ class FetchDiscreteCamEnv:
             return s, r, d, None
         else:
             resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
+            # resize_img = self.color_state_preprocess(rgb_gripper)
             return resize_img, r, d, None
 
         # return s, r, d, None
