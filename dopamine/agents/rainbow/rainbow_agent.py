@@ -74,7 +74,8 @@ class RainbowAgent(dqn_agent.DQNAgent):
                optimizer=tf.train.AdamOptimizer(
                    learning_rate=0.00025, epsilon=0.0003125),
                summary_writer=None,
-               summary_writing_frequency=500):
+               summary_writing_frequency=500,
+               img_div=1.0):
     """Initializes the agent and constructs the components of its graph.
 
     Args:
@@ -114,6 +115,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
     self._replay_scheme = replay_scheme
     # TODO(b/110897128): Make agent optimizer attribute private.
     self.optimizer = optimizer
+    self.img_div = img_div
 
     super(RainbowAgent, self).__init__(
         sess=sess,
@@ -158,7 +160,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
 
     net = tf.cast(state, tf.float32)
     print(' tf.float32 , net -> ', net)
-    net = tf.div(net, 255.)
+    net = tf.div(net, self.img_div)
     print(' div 255 , net -> ', net)
     net = slim.conv2d(
         net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)

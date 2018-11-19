@@ -11,3 +11,4 @@ log/
 RUN.md
 test.log
 output_layer/
+tmp/

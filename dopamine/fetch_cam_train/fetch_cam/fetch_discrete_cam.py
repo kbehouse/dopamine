@@ -1,41 +1,22 @@
 
 from fetch_cam import FetchDiscreteEnv
+from fetch_cam.img_process import ImgProcess, IMG_TYPE, IMG_SHOW
 import cv2
 import numpy as np
+import os
 
-
-IMG_W_H = 128
 # because thread bloack the image catch (maybe), so create the shell class 
 class FetchDiscreteCamEnv:
-    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, gray_img = True, use_tray = True, is_render = False, only_show_obj0=False):
+    def __init__(self, dis_tolerance = 0.001, step_ds=0.005, img_type = IMG_TYPE.RGB, 
+                    use_tray = True, is_render = False, only_show_obj0=False, 
+                    img_show_type = IMG_SHOW.HIDE):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, use_tray=use_tray, is_render = is_render)
-        self.gray_img = gray_img
+        self.img_type = img_type
         self.is_render = is_render
         self.only_show_obj0 = only_show_obj0
 
-
-    def state_preprocess(self, img):
-        resize_img = cv2.resize(img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
-        gray_img = cv2.cvtColor(resize_img, cv2.COLOR_RGB2GRAY)
-        return np.reshape(gray_img,(IMG_W_H,IMG_W_H,1))
-        
-
-    def color_state_preprocess(self, img):
-        imgNorm='sub_mean'
-        if imgNorm == "sub_and_divide":
-            img = np.float32(cv2.resize(img, ( IMG_W_H , IMG_W_H ))) / 127.5 - 1
-        elif imgNorm == "sub_mean":
-            img = cv2.resize(img, ( IMG_W_H , IMG_W_H ))
-            img = img.astype(np.float32)
-            img[:,:,0] -= 103.939
-            img[:,:,1] -= 116.779
-            img[:,:,2] -= 123.68
-        elif imgNorm == "divide":
-            img = cv2.resize(img, ( IMG_W_H , IMG_W_H ))
-            img = img.astype(np.float32)
-            img = img/255.0
-
-        return img
+        self.imp = ImgProcess(img_type, flip=False)
+        self.imp.show_type = img_show_type
 
     def step(self,action):
         # print('i action = ', action)
@@ -50,25 +31,12 @@ class FetchDiscreteCamEnv:
             mode='offscreen', device_id=-1)
         
         rgb_gripper =  cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
-        if self.is_render:
-            if self.gray_img:
-                # resize_img = cv2.resize(rgb_gripper, (256, 256), interpolation=cv2.INTER_AREA)
-                gray_img = cv2.cvtColor(rgb_gripper, cv2.COLOR_RGB2GRAY)
-                cv2.imshow('Gripper Image',gray_img)
-                cv2.waitKey(50)
-            else: 
-                self.render_gripper_img(rgb_gripper)
+        process_img = self.imp.preprocess(rgb_gripper)
+        # RESIZE
+        # resize_img = cv2.resize(process_img, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
 
-        # s = self.state_preprocess(rgb_gripper)
-        if self.gray_img:
-            s = self.state_preprocess(rgb_gripper)
-            return s, r, d, None
-        else:
-            resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
-            # resize_img = self.color_state_preprocess(rgb_gripper)
-            return resize_img, r, d, None
+        return process_img, r, d, cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
 
-        # return s, r, d, None
 
     @property
     def pos(self):
@@ -104,19 +72,10 @@ class FetchDiscreteCamEnv:
         rgb_gripper = self.env.sim.render(width=256, height=256, camera_name="gripper_camera_rgb", depth=False,
             mode='offscreen', device_id=-1)
     
-        if self.gray_img:
-            s = self.state_preprocess(rgb_gripper)
-            return s
-        else:
-            resize_img = cv2.resize(rgb_gripper, (IMG_W_H, IMG_W_H), interpolation=cv2.INTER_AREA)
-            return resize_img
+        rgb_gripper =  cv2.cvtColor(rgb_gripper, cv2.COLOR_BGR2RGB)
+        process_img = self.imp.preprocess(rgb_gripper)
+
+        return process_img
 
     def render(self):
         self.env.render()
-
-    
-    def render_gripper_img(self, gripper_img):
-        # if self.is_render:
-        # rgb_img = cv2.cvtColor(gripper_img, cv2.COLOR_BGR2RGB)
-        cv2.imshow('Gripper Image',gripper_img)
-        cv2.waitKey(50)

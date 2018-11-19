@@ -235,7 +235,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
     def step(self, action):
         reward = 0.0
         self.use_step += 1
-        done = True  if self.use_step >= 150 else False
+        done = True  if self.use_step >= 100 else False
         
         if action[4]==1:
             reward = self.pick_place(True)
@@ -487,6 +487,7 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
 
                 obj_pos_ary.append(object_xpos)
 
+        # obj_pos_ary[0] = [1.34139569, 0.82388215]
         return obj_pos_ary
 
             
