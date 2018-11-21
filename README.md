@@ -33,7 +33,7 @@ python -um dopamine.fetch_cam_train.train \
 ```
 python -um dopamine.fetch_cam_train.train \
   --agent_name=rainbow \
-  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_bin_r_measure__norotate \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_bin_r_0_norotate_diffgripperZ \
   --gin_files='dopamine/fetch_cam_train/rainbow.gin'
 ```
 

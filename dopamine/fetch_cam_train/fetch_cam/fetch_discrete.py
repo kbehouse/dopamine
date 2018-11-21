@@ -265,9 +265,9 @@ class FetchDiscreteEnv(fetch_env.FetchEnv, utils.EzPickle):
                 reward = -1
             else:
                 if self.use_tray and self.is_gripper_close:
-                    reward = self.measure_tray_reward() # 0
+                    reward = 0 # self.measure_tray_reward() # 0
                 else:
-                    reward = self.measure_obj_reward() # 0
+                    reward = 0# self.measure_obj_reward() # 0
             
 
         # print('action = ', action,', reward = ', reward)
