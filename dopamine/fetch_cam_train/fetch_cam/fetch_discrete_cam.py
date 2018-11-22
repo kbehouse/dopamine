@@ -9,7 +9,7 @@ import os
 class FetchDiscreteCamEnv:
     def __init__(self, dis_tolerance = 0.001, step_ds=0.005, img_type = IMG_TYPE.RGB, 
                     use_tray = True, is_render = False, only_show_obj0=False, 
-                    img_show_type = IMG_SHOW.HIDE):
+                    img_show_type = IMG_SHOW.RAW_PROCESS):
         self.env = FetchDiscreteEnv(dis_tolerance = 0.001, step_ds=0.005, use_tray=use_tray, is_render = is_render)
         self.img_type = img_type
         self.is_render = is_render

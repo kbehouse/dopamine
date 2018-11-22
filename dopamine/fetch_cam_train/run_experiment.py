@@ -52,7 +52,7 @@ def load_gin_configs(gin_files, gin_bindings):
 
 
 def create_fetch_cam_environment():
-  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=IMG_TYPE.BIN, only_show_obj0=True, is_render=False, use_tray=False)
+  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=IMG_TYPE.SEMANTIC, only_show_obj0=True, is_render=False, use_tray=False)
   return env
 
 '''

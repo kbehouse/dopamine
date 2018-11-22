@@ -125,6 +125,12 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --hsv=True
 ```
 
+# segnet 
+```
+python -um dopamine.fetch_cam_train.train_segnet \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_segnet \
+  --gin_files='dopamine/fetch_cam_train/rainbow_segnet.gin'
+```
 
 # run pick & place
 
@@ -144,6 +150,14 @@ python -um dopamine.fetch_cam_train.train_rgb_gripper \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```
 
+
+note the rainbow agent img_div=1.0
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/semantic_r_measure_no_pick \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
 
 ### Acknowledgement
 

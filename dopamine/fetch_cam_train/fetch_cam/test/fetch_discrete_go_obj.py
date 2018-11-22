@@ -79,7 +79,7 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
             else:
                 break
             step_count +=1
-            s,r, d, info =  env.step(0)
+            s,r, d, info =  env.step(a)
             # print('r = ', r)
             sum_r += r  
             
@@ -105,4 +105,4 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
     print('use time = {:.2f}'.format(time.time()-s_time))
 
 
-go_obj_savepic_with_camenv(img_type=IMG_TYPE.RAW, noise=False, is_render=True, only_show_obj0 = True)
+go_obj_savepic_with_camenv(img_type=IMG_TYPE.SEMANTIC, noise=False, is_render=True, only_show_obj0 = True)

@@ -32,13 +32,13 @@ def process_func(child_conn, d):
         output_prefix = '{}/{:03d}'.format(predict_dir, img_predict_id)
         output_path = output_prefix + '.png' 
         # print('Annotate finish, save to ' + output_path)
-
+        
         cv2.imwrite( output_prefix + '.png' , output )
         cv2.imwrite( output_prefix + '_show.jpg' , seg_img )
 
         child_conn.send( output_path)
 
-        img_predict_id+=1
+        img_predict_id = (img_predict_id + 1) if img_predict_id < 1000 else 0
 	        # cv2.imshow('label', seg_img)
 
 # img_dir = 'semantic_img_' + str( time.time() ) 

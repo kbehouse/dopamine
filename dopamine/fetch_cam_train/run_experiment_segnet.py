@@ -31,7 +31,7 @@ import gym
 import numpy as np
 import tensorflow as tf
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
-from fetch_cam import FetchDiscreteCamEnv
+from fetch_cam import FetchDiscreteCamEnv, IMG_TYPE
 import gin.tf
 
 
@@ -52,7 +52,7 @@ def load_gin_configs(gin_files, gin_bindings):
 
 
 def create_fetch_cam_environment():
-  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, gray_img=False, use_tray = False, is_render = False)
+  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=IMG_TYPE.SEMANTIC, use_tray = False, is_render = True, only_show_obj0 = True)
   return env
 
 '''
@@ -164,7 +164,7 @@ class Runner(object):
     self._environment = create_environment_fn()
     # Set up a session and initialize variables.
     config = tf.ConfigProto(allow_soft_placement=True)
-    config.gpu_options.per_process_gpu_memory_fraction = 0.76
+    config.gpu_options.per_process_gpu_memory_fraction = 0.3
     self._sess = tf.Session('',
                             config=config) #tf.ConfigProto(allow_soft_placement=True))
     self._agent = create_agent_fn(self._sess, self._environment,
@@ -225,6 +225,7 @@ class Runner(object):
       action: int, the initial action chosen by the agent.
     """
     initial_observation = self._environment.reset()
+    initial_observation = np.reshape(initial_observation,(initial_observation.shape[0],initial_observation.shape[1],1))
     return self._agent.begin_episode(initial_observation)
 
   def _run_one_step(self, action):
@@ -238,6 +239,7 @@ class Runner(object):
         environment.
     """
     observation, reward, is_terminal, _ = self._environment.step(action)
+    observation = np.reshape(observation,(observation.shape[0],observation.shape[1],1))
     return observation, reward, is_terminal
 
   def _end_episode(self, reward):

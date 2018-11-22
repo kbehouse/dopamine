@@ -218,7 +218,7 @@ class FetchEnv(robot_env.RobotEnv):
                     object_qpos[:2] = obj_pos_ary[i]
                     object_qpos[2] = obj_z if i>=1 else  object_qpos[2]
 
-                    degree = 0 #np.random.randint(0,90)
+                    degree = np.random.randint(0,90)
                     euler = [0, 0, np.deg2rad(degree)]
                     quat = self.euler2quat(euler)
                     object_qpos[3:] = quat

@@ -22,10 +22,9 @@ from dopamine.agents.rainbow.Encoder_Decoder import build_encoder_decoder
 slim = tf.contrib.slim
 
 
-# TWO_IMG_OBSERVATION_SHAPE = (1, 84, 84, 3)
-STATE_W_H = 128
+STATE_W_H = 84
 dqn_agent.OBSERVATION_SHAPE = (STATE_W_H, STATE_W_H, 3) 
-dqn_agent.STACK_SIZE = 2
+dqn_agent.STACK_SIZE = 4
 
 @gin.configurable
 class RainbowSegNetAgent(RainbowAgent):
