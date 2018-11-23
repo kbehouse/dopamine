@@ -31,7 +31,7 @@ import gym
 import numpy as np
 import tensorflow as tf
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
-from fetch_cam.fetch_discrete_cam import FetchDiscreteCamEnv, IMG_TYPE
+from fetch_cam.fetch_discrete_cam import FetchDiscreteCamEnv, IMG_TYPE, IMG_SHOW
 import gin.tf
 
 
@@ -52,7 +52,8 @@ def load_gin_configs(gin_files, gin_bindings):
 
 
 def create_fetch_cam_environment():
-  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=IMG_TYPE.SEMANTIC, only_show_obj0=True, is_render=False, use_tray=False)
+  env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=IMG_TYPE.SEMANTIC, 
+            only_show_obj0=True, is_render=False, use_tray=False, img_show_type=IMG_SHOW.HIDE)
   return env
 
 '''
