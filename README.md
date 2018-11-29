@@ -1,10 +1,39 @@
 # Update Dopamine  with Siamese Network
 
+
+# segnet
+```
+python -um dopamine.fetch_cam_train.train_segnet \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_segnet \
+  --gin_files='dopamine/fetch_cam_train/rainbow_segnet.gin'
+```
+
 # 84 x 84 gray
 ```
 python -um dopamine.fetch_cam_train.train \
   --agent_name=rainbow \
   --base_dir=/home/iclab/phd/DRL/dopamine/log/fetch_cam_rainbow_reward_0 \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
+
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_84_gray_r_measure_realbot_tex \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
+
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_bin_r_measure \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
+
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_bin_r_0_norotate_diffgripperZ \
   --gin_files='dopamine/fetch_cam_train/rainbow.gin'
 ```
 
@@ -105,6 +134,12 @@ python -um dopamine.fetch_cam_train.train_siamese \
   --hsv=True
 ```
 
+# segnet 
+```
+python -um dopamine.fetch_cam_train.train_segnet \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_segnet \
+  --gin_files='dopamine/fetch_cam_train/rainbow_segnet.gin'
+```
 
 # run pick & place
 
@@ -124,6 +159,14 @@ python -um dopamine.fetch_cam_train.train_rgb_gripper \
   --gin_files='dopamine/fetch_cam_train/rainbow_rgb_gripper.gin'
 ```
 
+
+note the rainbow agent img_div=1.0
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/semantic_r_measure_no_pick \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
 
 ### Acknowledgement
 

@@ -11,3 +11,6 @@ log/
 RUN.md
 test.log
 output_layer/
+tmp/
+semantic_annotate/
+semantic_raw_img/

@@ -37,11 +37,16 @@ def hsv_and_mask(img,lower_hsv, upper_hsv,  show_id):
     mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
     # Bitwise-AND mask and original image
-    res = cv2.bitwise_and(frame,frame, mask= mask)
+    res = cv2.bitwise_and(img,img, mask= mask)
 
-    cv2.imshow('frame%02' % show_id, img)
-    cv2.imshow('mask%02' % show_id,mask)
-    cv2.imshow('res%02' % show_id,res)
+    cv2.imshow('frame%02d' % show_id, img)
+    cv2.imshow('mask%02d' % show_id,mask)
+    cv2.imshow('res%02d' % show_id,res)
+
+
+    cv2.moveWindow('frame%02d' % show_id, 200, 300 * (show_id-1))
+    cv2.moveWindow('mask%02d' % show_id, 600, 300 * (show_id-1))
+    cv2.moveWindow('res%02d' % show_id, 1000, 300 * (show_id-1))
 
 while(1):
 
@@ -55,36 +60,25 @@ while(1):
     s_u = cv2.getTrackbarPos('s_u','result')
     v_u = cv2.getTrackbarPos('v_u','result')
 
-    # Take each frame
-    # _, frame = cap.read()
-    frame   = cv2.imread('sim_pic/001.jpg')
-    frame_2 = cv2.imread('sim_pic/028.jpg')
-
-    # Convert BGR to HSV
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
     # Normal masking algorithm
     lower_hsv = np.array([h,s,v])
     upper_hsv = np.array([h_u,s_u,v_u])
 
-    print('h: [{}-{}], s: [{}-{}], v: [{}-{}]'.format(h,h_u, s, s_u, v,v_u))
+    # Take each frame
+    # _, frame = cap.read()
+    # frame1   = cv2.imread('sim_pic/001.jpg')
+    # frame2 = cv2.imread('sim_pic/028.jpg')
+    # frame3   = cv2.imread('sim_pic_2/001.jpg')
+    frame1  = cv2.imread('012.jpg')
+    frame2  = cv2.imread('019.jpg')
+    frame3  = cv2.imread('022.jpg')
 
-    # h_2, s_2, v_2 = h+ (h_u-h)* 0.5, s+ (s_u-s)* 0.5, v+ (v_u-v)* 0.5
-    # print('lower h,s,v = (%d, %d, %d)' %(h,s,v) ,', hsv2bgr = ', one_hsv_2_bgr(h, s, v))
-    # print('upper h,s,v = (%d, %d, %d)' %(h_u,s_u,v_u) ,' hsv2bgr = ', one_hsv_2_bgr(h_u, s_u , v_u))
-    # print('half h,s,v = (%d, %d, %d)' %(h_2,s_2,v_2) ,' hsv2bgr = ', one_hsv_2_bgr(h_2, s_2 , v_2))
-    # one_hsv_2_bgr_show('half',h_2,s_2,v_2)
-    # hsv2bgr =  [[[14  7 41]]]
+    
+    hsv_and_mask(frame1, lower_hsv, upper_hsv, 1 )
+    hsv_and_mask(frame2, lower_hsv, upper_hsv, 2 )
+    hsv_and_mask(frame3, lower_hsv, upper_hsv, 3 )
 
-    # Threshold the HSV image to get only blue colors
-    mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
-    # Bitwise-AND mask and original image
-    res = cv2.bitwise_and(frame,frame, mask= mask)
-
-    cv2.imshow('frame',frame)
-    cv2.imshow('mask',mask)
-    cv2.imshow('res',res)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break

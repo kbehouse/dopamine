@@ -14,7 +14,11 @@
         <material name="blue_mat" specular="0" shininess="0.5" reflectance="0" rgba="0.0 0.0 0.5 1"></material>
          
         <texture  name="object0_tex" file="redtexture.png"   ></texture>
+<<<<<<< HEAD
         <material name="object0_mat" texture="texture_block" > </material>
+=======
+        <material name="object0_mat" texture="object0_tex" > </material>
+>>>>>>> 51d63281187081287e10c6b5f8ac495320ed80aa
 
         <texture  name="table_tex" file="table.png"   ></texture>
         <material name="table_mat" texture="table_tex" > </material>

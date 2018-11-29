@@ -11,11 +11,17 @@ probability_4 = [8.624141e-06,3.3425856e-06,3.5190653e-06,6.045648e-06,5.234189e
 
 s_x_p = _support * probability_0
 
+multi_list = [_support * probability_0, _support * probability_1, _support * probability_2, _support * probability_3, _support * probability_4]
+
+sum_list = [np.sum(m) for m in multi_list ]
+
+
+print(sum_list)
 
 print('_support = ', _support)
 
-print('probability_0')
-print('\tsum = ', np.sum(probability_0))
-print('\ts_x_p_sum =' , np.sum(s_x_p))
+# print('probability_0')
+# print('\tsum = ', np.sum(probability_0))
+# print('\ts_x_p_sum =' , np.sum(s_x_p))
 
 

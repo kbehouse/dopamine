@@ -1,0 +1,34 @@
+# Hyperparameters follow Hessel et al. (2018), except for sticky_actions,
+# which was False (not using sticky actions) in the original paper.
+import dopamine.agents.rainbow.rainbow_segnet_agent
+import dopamine.fetch_cam_train.run_experiment_segnet
+import dopamine.replay_memory.prioritized_replay_buffer
+import gin.tf.external_configurables
+
+RainbowSegNetAgent.num_atoms = 51
+RainbowSegNetAgent.vmax = 10.
+RainbowSegNetAgent.gamma = 0.99
+RainbowSegNetAgent.update_horizon = 3
+RainbowSegNetAgent.min_replay_history = 20000  # agent steps  1000
+RainbowSegNetAgent.update_period = 4
+RainbowSegNetAgent.target_update_period = 8000  # agent steps
+RainbowSegNetAgent.epsilon_train = 0.01
+RainbowSegNetAgent.epsilon_eval = 0.001
+RainbowSegNetAgent.epsilon_decay_period = 100000  # agent steps
+RainbowSegNetAgent.replay_scheme = 'prioritized'
+RainbowSegNetAgent.tf_device = '/gpu:0'  # use '/cpu:*' for non-GPU version
+RainbowSegNetAgent.optimizer = @tf.train.AdamOptimizer()
+
+# Note these parameters are different from C51's.
+tf.train.AdamOptimizer.learning_rate = 0.0000625
+tf.train.AdamOptimizer.epsilon = 0.00015
+
+
+# Sticky actions with probability 0.25, as suggested by (Machado et al., 2017).
+Runner.num_iterations = 200
+Runner.training_steps = 100000 #100000  # agent steps
+Runner.evaluation_steps = 1000  # agent steps
+Runner.max_steps_per_episode = 27000  # agent steps
+
+WrappedPrioritizedReplayBuffer.replay_capacity = 100000
+WrappedPrioritizedReplayBuffer.batch_size = 32
