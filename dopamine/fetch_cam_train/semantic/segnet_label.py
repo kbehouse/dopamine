@@ -20,7 +20,9 @@ class SegnetLabel:
 		self.limit_gpu_memory()
 
 		self.m = VGGSegnet( n_classes , input_height=input_height, input_width=input_width   )
-		self.m.load_weights(  save_weights_path + "." + str(  epoch_number )  )
+		weight_path = save_weights_path + "." + str(  epoch_number )
+		print('SegnetLabel Load Segnet weight_path: ' + weight_path)
+		self.m.load_weights(weight_path )
 		self.m.compile(loss='categorical_crossentropy',
 			optimizer= 'adadelta' ,
 			metrics=['accuracy'])
@@ -28,7 +30,11 @@ class SegnetLabel:
 		self.n_classes = n_classes
 		self.input_height = input_height
 		self.input_width = input_width
+		self.want_class = 1
+		# class:1 -> CHO, class:1 -> CHO, class:2 -> fu, class:3 -> iPhone 
 
+	def set_want_class(self, want_class):
+		self.want_class = want_class 
 
 	def limit_gpu_memory(self):
 		# ---- limit  GPU memory resource-----#
@@ -42,6 +48,8 @@ class SegnetLabel:
 		X = self.getImageArr(inName , self.input_width  , self.input_height , ordering='None', img=img )
 		pr = self.m.predict( np.array([X]) )[0]
 		pr = pr.reshape(( self.m.outputHeight ,  self.m.outputWidth , self.n_classes ) ).argmax( axis=2 )
+		pr = (pr[:,:] == self.want_class).astype('uint8')
+
 		return pr
 
 	def getImageArr(self, path , width , height , imgNorm="sub_mean" , ordering='channels_first', img=None):

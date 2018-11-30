@@ -161,6 +161,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
     net = tf.cast(state, tf.float32)
     print(' tf.float32 , net -> ', net)
     net = tf.div(net, self.img_div)
+    print('self.img_div = ', self.img_div)
     print(' div 255 , net -> ', net)
     net = slim.conv2d(
         net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)

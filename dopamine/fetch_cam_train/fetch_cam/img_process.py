@@ -66,8 +66,8 @@ class ImgProcess:
         if self.flip:
             rgb_gripper = cv2.flip(rgb_gripper,0)
         if show_type==IMG_SHOW.RAW or show_type==IMG_SHOW.RAW_PROCESS:
-            show_img = cv2.flip(rgb_gripper,0)
-            cv2.imshow('Raw Image',show_img)
+            # show_img = cv2.flip(rgb_gripper,0)
+            cv2.imshow('Raw Image',rgb_gripper)
             cv2.waitKey(10)
 
         
@@ -112,7 +112,7 @@ class ImgProcess:
                 show_img = process_img*255.0
             else:
                 show_img = process_img
-            show_img = cv2.flip(show_img,0)
+            # show_img = cv2.flip(show_img,0)
             cv2.imshow('Process Image',show_img)
             cv2.waitKey(10)
         

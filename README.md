@@ -8,6 +8,19 @@ python -um dopamine.fetch_cam_train.train_segnet \
   --gin_files='dopamine/fetch_cam_train/rainbow_segnet.gin'
 ```
 
+```
+python -um dopamine.fetch_cam_train.train_segnet \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/rainbow_segnet_3obj \
+  --gin_files='dopamine/fetch_cam_train/rainbow_segnet.gin'
+```
+
+```
+python -um dopamine.fetch_cam_train.train \
+  --agent_name=rainbow \
+  --base_dir=/home/iclab/phd/DRL/dopamine/log/segnet_CHO_r_measure_3cm \
+  --gin_files='dopamine/fetch_cam_train/rainbow.gin'
+```
+
 # 84 x 84 gray
 ```
 python -um dopamine.fetch_cam_train.train \

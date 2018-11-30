@@ -4,7 +4,7 @@ import time
 from matplotlib import pyplot as plt
 import sys, os
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)),'../../'))
-from fetch_cam.fetch_discrete_cam import FetchDiscreteCamEnv, IMG_TYPE
+from fetch_cam.fetch_discrete_cam import FetchDiscreteCamEnv, IMG_TYPE, EnvType
 from fsm import FSM
 import cv2
 from PIL import Image
@@ -28,13 +28,15 @@ def to_digit(img, path):
         fo.write('\n' )
     fo.close()
 
-def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise=False, only_show_obj0 = False):
+def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, env_type=EnvType.RedCube, noise=False, only_show_obj0 = False):
     if os.path.exists('tmp/'):
         shutil.rmtree('tmp/') 
     
     # dis_tolerance  = 0.0001     # 1mm
     step_ds = 0.005
-    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=img_type,use_tray=False, is_render=is_render, only_show_obj0 = only_show_obj0)
+    env = FetchDiscreteCamEnv(dis_tolerance = 0.001, step_ds=0.005, img_type=img_type,
+                    env_type=env_type, is_render=is_render, 
+                    only_show_obj0 = only_show_obj0)
     # obs = env.reset()
     # done = False
 
@@ -63,6 +65,8 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
 
         target_pos_x = env.obj_pos[0] + noise_x
         target_pos_y = env.obj_pos[1] + noise_y
+        diff_z = env.obj_pos[2] - env.pos[2]
+        print('DIFF Z = ', diff_z)
         while True:
             if is_render:
                 env.render()
@@ -80,7 +84,7 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
                 break
             step_count +=1
             s,r, d, info =  env.step(a)
-            # print('r = ', r)
+            # print('a=', a,  ', r = ', r)
             sum_r += r  
             
             # print('env.obj_pos = ', env.obj_pos)
@@ -95,6 +99,7 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
         a = 4 # [0, 0, 0, 0, 1]
         # s,r, d, info =  env.step(a)
         s,r, d, info =  env.step(a)
+        print('final r = ', r )
         sum_r += r  
         print('sum_r = ', sum_r)
         print("use step = ", step_count)
@@ -105,4 +110,7 @@ def go_obj_savepic_with_camenv(is_render = True, img_type = IMG_TYPE.GRAY, noise
     print('use time = {:.2f}'.format(time.time()-s_time))
 
 
-go_obj_savepic_with_camenv(img_type=IMG_TYPE.SEMANTIC, noise=False, is_render=True, only_show_obj0 = True)
+go_obj_savepic_with_camenv(img_type=IMG_TYPE.SEMANTIC, 
+                    env_type=EnvType.ThreeObj,
+                    noise=False, is_render=True, 
+                    only_show_obj0 = True)
